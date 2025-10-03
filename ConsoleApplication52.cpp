@@ -1,5 +1,8 @@
 #include "SistemaFinanciero.h"
+#include "PersonaNatural.h"
+#include "PersonaJuridica.h"
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -29,10 +32,38 @@ int main() {
             cin >> email;
             cout << "Codigo: ";
             cin >> codigo;
-            cout << "Fecha Registro (YYYY-MM-DD): ";
+            cout << "Fecha Registro (DD/MM/AAAA): ";
             cin >> fecha;
 
             Cliente* nuevo = new Cliente(id, nombre, apellido, email, codigo, fecha);
+
+            // preguntar tipo de persona y asignar detalles
+            cout << "Tipo de cliente (1 = persona natural, 2 = persona juridica): ";
+            int tipo;
+            cin >> tipo;
+            if (tipo == 1) {
+                // persona natural: solicitar dni y fecha de nacimiento
+                cout << "DNI: ";
+                string dni; cin >> dni;
+                cout << "Fecha de nacimiento (DD/MM/AAAA): ";
+                string fn; cin >> fn;
+                PersonaNatural* pn = new PersonaNatural(id, nombre, apellido, email, dni, fn);
+                nuevo->setDetallesPersona(pn);
+            } else if (tipo == 2) {
+                // persona juridica: solicitar ruc y razon social (puede tener espacios)
+                cout << "RUC: ";
+                string ruc; cin >> ruc;
+                // limpiar el newline antes de getline
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Razon social: ";
+                string razon;
+                getline(cin, razon);
+                PersonaJuridica* pj = new PersonaJuridica(id, nombre, apellido, email, ruc, razon);
+                nuevo->setDetallesPersona(pj);
+            } else {
+                cout << "Tipo invalido. Se registrara sin detalles especificos.\n";
+            }
+
             sistema.registrarNuevoCliente(nuevo);
             break;
         }
@@ -79,10 +110,12 @@ int main() {
         }
 
         if (opcion != 0) {
+            // pausa antes de mostrar el menu nuevamente
             cout << "\nPresione Enter para continuar...";
-            cin.ignore();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cin.get();
         }
+
 
     } while (opcion != 0);
 

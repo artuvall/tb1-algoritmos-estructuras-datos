@@ -2,6 +2,8 @@
 #define CLIENTE_H
 
 #include "Persona.h"
+#include "PersonaNatural.h"
+#include "PersonaJuridica.h"
 #include "CuentaBancaria.h"
 #include "Prestamo.h"
 #include "ListaSimple.h"
@@ -14,11 +16,21 @@ private:
     string fechaRegistro;
     ListaSimple<CuentaBancaria*> cuentas;
     ListaSimple<Prestamo*> prestamos;
+    Persona* detallesPersona = nullptr; // puntero a persona natural o juridica
 
 public:
     Cliente(string i, string n, string a, string e, string c, string f)
         : Persona(i, n, a, e), codigo(c), fechaRegistro(f) {
     }
+
+    ~Cliente() {
+        // liberar detalles persona si fue asignada
+        if (detallesPersona) delete detallesPersona;
+    }
+
+    // permitir asociar detalles (persona natural o juridica)
+    void setDetallesPersona(Persona* p) { detallesPersona = p; }
+    Persona* getDetallesPersona() const { return detallesPersona; }
 
     bool validar() override { return true; }
 
@@ -53,6 +65,23 @@ public:
         cout << "Fecha Registro: " << fechaRegistro << "\n";
         cout << "Cuentas: " << cuentas.getTamano() << "\n";
         cout << "Prestamos: " << prestamos.getTamano() << "\n";
+        // mostrar detalles especificos segun tipo si existen
+        if (detallesPersona) {
+            // intentar caster a natural
+            PersonaNatural* pn = dynamic_cast<PersonaNatural*>(detallesPersona);
+            if (pn) {
+                cout << "Tipo: Persona Natural\n";
+                cout << "DNI: " << pn->getDni() << "\n";
+                cout << "Fecha Nac: " << pn->getFechaNac() << "\n";
+            } else {
+                PersonaJuridica* pj = dynamic_cast<PersonaJuridica*>(detallesPersona);
+                if (pj) {
+                    cout << "Tipo: Persona Juridica\n";
+                    cout << "RUC: " << pj->getRuc() << "\n";
+                    cout << "Razon social: " << pj->getRazonSocial() << "\n";
+                }
+            }
+        }
     }
 
     // metodo para listar cuentas

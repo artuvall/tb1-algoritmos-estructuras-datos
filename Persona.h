@@ -17,6 +17,8 @@ public:
         : id(i), nombre(n), apellido(a), email(e) {
     }
 
+    virtual ~Persona() {} // destructor virtual para eliminar derivados de forma segura
+
     virtual bool validar() = 0; // Metodo abstracto para polimorfismo.
 
     string getId() const { return id; }

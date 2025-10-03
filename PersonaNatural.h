@@ -16,9 +16,13 @@ public:
     }
 
     bool validar() override {
-        auto esValido = [](const string& s) { return s.length() >= 8; }; // Lambda 3: Validar DNI.
+        auto esValido = [](const string& s) { return s.length() >= 8; }; // lambda 3: validar dni
         return esValido(dni) && esValido(fechaNac);
     }
+
+    // getters para acceder a los datos especificos
+    string getDni() const { return dni; }
+    string getFechaNac() const { return fechaNac; }
 };
 
 #endif
