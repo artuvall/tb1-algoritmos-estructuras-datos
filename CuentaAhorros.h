@@ -12,6 +12,11 @@ private:
     double limiteRetiroDiario;
 
 public:
+    // constructor sobrecargado: con limite predeterminado
+    CuentaAhorros(string num, double s, string tit, string fecha, double tasa)
+        : CuentaBancaria(num, s, tit, fecha), tasaInteres(tasa), limiteRetiroDiario(500.0) {}
+
+    // constructor con limite custom
     CuentaAhorros(string num, double s, string tit, string fecha, double tasa, double limite)
         : CuentaBancaria(num, s, tit, fecha), tasaInteres(tasa), limiteRetiroDiario(limite) {}
 
@@ -23,7 +28,7 @@ public:
     }
 
     bool retirar(double monto) override {
-        // Lambda 1: Validar limite de retiro. Integrante 2
+        // lambda 1 integrante 2: validar limite de retiro
         auto dentroLimite = [this](double m) { return m <= limiteRetiroDiario; };
         if (monto <= saldo && dentroLimite(monto)) {
             saldo -= monto;
@@ -35,12 +40,12 @@ public:
     }
 
     double calcularInteres() {
-        // Lambda 2: Calcular interes diario. Integrante 2
+        // lambda 2 integrante 2: calcular interes diario
         auto calcular = [this]() { return saldo * tasaInteres / 360; };
         return calcular();
     }
 
-    // Lambda 3: Verificar si se puede aplicar promocion. Integrante 2
+    // lambda 3 integrante 2: verificar si se puede aplicar promocion
     bool esElegiblePromocion() {
         auto promocion = [this]() { return saldo > 1000.0 && limiteRetiroDiario > 500.0; };
         return promocion();

@@ -1,8 +1,9 @@
 #ifndef LISTADOBLE_H  
 #define LISTADOBLE_H  
-//ListaDoble.h  
-#include <iostream>  
-#include <functional> // Anadido para std::function
+// ListaDoble.h - Estructura generica con templates
+// metodos implementados por integrante 2
+#include <iostream>
+#include <functional>
 
 using namespace std;
 
@@ -43,17 +44,57 @@ public:
         tamano++;
     }
 
-    ListaDoble<T> filtrar(std::function<bool(T)> filtro) { // Cambiado a std::function
+    // metodo custom 1 integrante 2: insertar al final
+    void insertarAlFinal(T dato) {
+        NodoDoble<T>* nuevo = new NodoDoble<T>(dato);
+        if (!cola) cabeza = cola = nuevo;
+        else {
+            nuevo->anterior = cola;
+            cola->siguiente = nuevo;
+            cola = nuevo;
+        }
+        tamano++;
+    }
+
+    // metodo custom 2 integrante 2: eliminar por valor
+    bool eliminarPorValor(T valor) {
+        NodoDoble<T>* temp = cabeza;
+        while (temp) {
+            if (temp->dato == valor) {
+                if (temp->anterior) temp->anterior->siguiente = temp->siguiente;
+                else cabeza = temp->siguiente;
+                if (temp->siguiente) temp->siguiente->anterior = temp->anterior;
+                else cola = temp->anterior;
+                delete temp;
+                tamano--;
+                return true;
+            }
+            temp = temp->siguiente;
+        }
+        return false;
+    }
+
+    // metodo custom 3 integrante 2: obtener en posicion
+    T* obtenerEnPosicion(int pos) {
+        if (pos < 0 || pos >= tamano) return nullptr;
+        NodoDoble<T>* temp = cabeza;
+        for (int i = 0; i < pos; i++) {
+            temp = temp->siguiente;
+        }
+        return &(temp->dato);
+    }
+
+    ListaDoble<T> filtrar(std::function<bool(T)> filtro) {
         ListaDoble<T> resultado;
         NodoDoble<T>* temp = cabeza;
         while (temp) {
-            if (filtro(temp->dato)) resultado.insertarAlInicio(temp->dato);
+            if (filtro(temp->dato)) resultado.insertarAlFinal(temp->dato);
             temp = temp->siguiente;
         }
         return resultado;
     }
 
-    void invertir() { // M�todo custom: Invertir lista.  
+    void invertir() {
         NodoDoble<T>* temp = nullptr;
         NodoDoble<T>* actual = cabeza;
         cola = cabeza;
@@ -66,7 +107,7 @@ public:
         if (temp) cabeza = temp->anterior;
     }
 
-    void aplicar(std::function<void(T)> func) { // Cambiado a std::function
+    void aplicar(std::function<void(T)> func) {
         NodoDoble<T>* temp = cabeza;
         while (temp) {
             func(temp->dato);
@@ -74,12 +115,18 @@ public:
         }
     }
 
-    bool buscarRecursivo(T valor, NodoDoble<T>* nodo) { // Recursividad: Buscar.  
+    // recursividad integrante 2: buscar valor recursivamente
+    bool buscarRecursivo(T valor, NodoDoble<T>* nodo) {
         if (!nodo) return false;
         if (nodo->dato == valor) return true;
         return buscarRecursivo(valor, nodo->siguiente);
     }
-    bool buscarRecursivo(T valor) { return buscarRecursivo(valor, cabeza); } // Integrante 2  
+    bool buscarRecursivo(T valor) { return buscarRecursivo(valor, cabeza); }
+
+    int getTamano() const { return tamano; }
+
+    NodoDoble<T>* getCabeza() { return cabeza; }
+    NodoDoble<T>* getCola() { return cola; }
 };
 
 #endif

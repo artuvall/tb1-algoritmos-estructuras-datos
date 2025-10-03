@@ -1,6 +1,7 @@
 #ifndef PILA_H
 #define PILA_H
-//Pila.h
+// Pila.h - Estructura de pila generica con templates
+// metodos implementados por integrante 4
 #include "ListaSimple.h"
 
 using namespace std;
@@ -11,42 +12,63 @@ private:
     ListaSimple<T> listaInterna;
 
 public:
-    void push(T dato) { listaInterna.insertarAlFinal(dato); }
+    void push(T dato) {
+        listaInterna.insertarAlInicio(dato); // insertar al inicio para push O(1)
+    }
 
     T pop() {
-        int ultimo = listaInterna.getTamano() - 1;
-        T* ptr = listaInterna.buscar([](T d) { return true; }); // Simpl, usa último.
+        if (listaInterna.getTamano() == 0) throw "pila vacia";
+        T* ptr = listaInterna.obtenerEnPosicion(0);
         if (ptr) {
             T dato = *ptr;
-            listaInterna.eliminar(ultimo);
+            listaInterna.eliminar(0);
             return dato;
         }
-        throw "Pila vacía";
+        throw "pila vacia";
     }
 
-    T top(auto check) { // Lambda 1: Ver cima con condición.
-        return *listaInterna.buscar(check);
+    T top() {
+        if (listaInterna.getTamano() == 0) throw "pila vacia";
+        T* ptr = listaInterna.obtenerEnPosicion(0);
+        if (ptr) return *ptr;
+        throw "pila vacia";
     }
 
-    void invertir() { // Método custom: Invertir pila.
-        Pila<T> temp;
-        while (listaInterna.getTamano() > 0) temp.push(pop());
-        listaInterna = temp.listaInterna;
+    // metodo custom 1 integrante 4: buscar elemento con lambda
+    bool buscar(std::function<bool(T)> predicado) {
+        return listaInterna.buscar(predicado) != nullptr;
     }
 
-    bool buscar(auto pred) { // Lambda 2: Buscar en pila.
-        return listaInterna.buscar(pred) != nullptr;
+    // metodo custom 2 integrante 4: invertir pila
+    void invertir() {
+        listaInterna.invertir();
     }
 
-    void vaciarRecursivo(Nodo<T>* nodo) { // Recursividad: Vaciar.
+    // metodo custom 3 integrante 4: contar elementos que cumplen condicion
+    int contarSi(std::function<bool(T)> condicion) {
+        int count = 0;
+        auto contador = [&count, condicion](T dato) {
+            if (condicion(dato)) count++;
+        };
+        listaInterna.imprimir(contador);
+        return count;
+    }
+
+    // recursividad integrante 4: vaciar pila recursivamente
+    void vaciarRecursivoAux(Nodo<T>* nodo) {
         if (!nodo) return;
-        vaciarRecursivo(nodo->siguiente);
+        vaciarRecursivoAux(nodo->siguiente);
         delete nodo;
     }
-    void vaciar() {
-        vaciarRecursivo(listaInterna.cabeza);
-        listaInterna.cabeza = nullptr;
-    } // Integrante 4
+
+    void vaciarRecursivo() {
+        vaciarRecursivoAux(listaInterna.getCabeza());
+        listaInterna.setCabeza(nullptr);
+    }
+
+    int getTamano() { return listaInterna.getTamano(); }
+
+    bool estaVacia() { return listaInterna.getTamano() == 0; }
 };
 
 #endif
