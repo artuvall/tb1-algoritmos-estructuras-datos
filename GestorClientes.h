@@ -79,9 +79,16 @@ public:
    ListaSimple<Cliente*> filtrarPorSaldo(double montoMinimo) {
        ListaSimple<Cliente*> resultado;
        auto filtro = [montoMinimo](Cliente* cl) {
-           // verificar si tiene saldo suficiente
-           return true; // simplificado
+           // verificar si el saldo total de todas las cuentas es mayor al minimo
+           return cl->getSaldoTotal() >= montoMinimo;
        };
+       // recorrer lista y agregar clientes que cumplan filtro
+       for (int i = 0; i < listaClientes.getTamano(); i++) {
+           Cliente* cl = *listaClientes.obtenerEnPosicion(i);
+           if (filtro(cl)) {
+               resultado.insertarAlFinal(cl);
+           }
+       }
        return resultado;
    }
 

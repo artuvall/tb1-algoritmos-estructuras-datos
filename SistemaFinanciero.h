@@ -48,10 +48,6 @@ public:
         archiver.cargarClientesArchivo("clientes.txt", gestor.getListaClientes());
     }
 
-    Cliente* buscarPorCodigo(const string& codigo) {
-        return gestor.buscarPorCodigo(codigo);
-    }
-
     void registrarNuevoCliente(Cliente* nuevo) {
         if (nuevo->validar()) {
             gestor.registrarNuevoCliente(nuevo);
@@ -59,6 +55,11 @@ public:
         } else {
             cout << "Error: cliente no valido.\n";
         }
+    }
+
+    // metodo para buscar cliente por codigo (expone funcionalidad del gestor)
+    Cliente* buscarPorCodigo(const string& codigo) {
+        return gestor.buscarPorCodigo(codigo);
     }
 
     void mostrarMenuPrincipal() {

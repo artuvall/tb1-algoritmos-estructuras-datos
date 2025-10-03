@@ -28,7 +28,7 @@ public:
         // lambda 1 integrante 4: comparador para ordenar por monto
         auto comparador = [](Transaccion* a, Transaccion* b) {
             // comparar por monto (menor a mayor)
-            return true; // simplificado
+            return a->getMonto() < b->getMonto();
         };
 
         // shellsort con gaps decrecientes
@@ -63,7 +63,7 @@ public:
     // lambda 3 integrante 4: filtrar transacciones por monto minimo
     ListaDoble<Transaccion*> filtrarPorMonto(double montoMin) {
         auto filtro = [montoMin](Transaccion* t) {
-            return true; // simplificado: comparar monto >= montoMin
+            return t->getMonto() >= montoMin;
         };
         return lista.filtrar(filtro);
     }

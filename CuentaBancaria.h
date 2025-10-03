@@ -85,7 +85,8 @@ public:
         // lambda 1 integrante 2: comparador para ordenar por fecha
         auto comparador = [](Transaccion* a, Transaccion* b) {
             // comparar por fecha (mas reciente primero)
-            return true; // simplificado
+            // asumiendo formato DD/MM/AAAA, ordenar de forma descendente
+            return a->getFecha() > b->getFecha();
         };
 
         mergeSortRecursivo(arr, 0, n - 1, comparador);

@@ -38,11 +38,10 @@ int main() {
             cin >> apellido;
             cout << "Email: ";
             cin >> email;
-
-            // VALIDAR CODIGO UNICO
             cout << "Codigo de Cliente (ej: 121200): ";
             cin >> codigo;
 
+            // validar que el codigo no este duplicado
             if (sistema.buscarPorCodigo(codigo) != nullptr) {
                 cout << "\n*** ERROR: Ya existe un cliente con el codigo " << codigo << " ***\n";
                 cout << "Registro cancelado. Intente con un codigo diferente.\n";

@@ -55,6 +55,18 @@ public:
     int getCantidadCuentas() { return cuentas.getTamano(); }
     int getCantidadPrestamos() { return prestamos.getTamano(); }
 
+    // metodo para calcular saldo total de todas las cuentas
+    double getSaldoTotal() const {
+        double total = 0.0;
+        for (int i = 0; i < cuentas.getTamano(); i++) {
+            CuentaBancaria* cuenta = *cuentas.obtenerEnPosicion(i);
+            if (cuenta) {
+                total += cuenta->getSaldo();
+            }
+        }
+        return total;
+    }
+
     // metodo para mostrar informacion del cliente
     void mostrarInfo() {
         cout << "\n=== INFORMACION DEL CLIENTE ===\n";
