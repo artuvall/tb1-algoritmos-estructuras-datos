@@ -12,6 +12,7 @@
 #include "HistoricoTransacciones.h"
 #include <iostream>
 #include <limits>
+#include <iomanip> // para setprecision
 
 using namespace std;
 
@@ -47,6 +48,10 @@ public:
         archiver.cargarClientesArchivo("clientes.txt", gestor.getListaClientes());
     }
 
+    Cliente* buscarPorCodigo(const string& codigo) {
+        return gestor.buscarPorCodigo(codigo);
+    }
+
     void registrarNuevoCliente(Cliente* nuevo) {
         if (nuevo->validar()) {
             gestor.registrarNuevoCliente(nuevo);
@@ -67,6 +72,8 @@ public:
         cout << "7. Procesar Siguiente Transaccion\n";
         cout << "8. Deshacer Ultima Operacion\n";
         cout << "9. Ver Historial Global\n";
+        cout << "10. Ver Cronograma de Prestamo\n";
+        cout << "11. Pagar Cuota de Prestamo\n";
         cout << "0. Salir\n";
         cout << string(40, '-') << "\n";
     }
@@ -211,7 +218,7 @@ public:
         cout << "\nUse la opcion 7 para procesar transacciones pendientes.\n";
     }
 
-    // caso 4: solicitar prestamo
+    // caso 4: solicitar prestamo (actualizado con cuotas y garantia)
     void solicitarPrestamo() {
         gestor.imprimirClientes();
 
@@ -230,30 +237,91 @@ public:
             return;
         }
 
-        cout << "\nIngrese monto del prestamo: ";
+        cout << "\n=== SOLICITUD DE PRESTAMO ===\n";
+        cout << "Ingrese monto del prestamo (S/): ";
         double monto;
         cin >> monto;
 
-        cout << "Ingrese plazo (meses): ";
+        if (monto <= 0) {
+            cout << "Monto invalido.\n";
+            return;
+        }
+
+        cout << "Ingrese plazo en meses (6-48): ";
         int plazo;
         cin >> plazo;
+
+        if (plazo < 6 || plazo > 48) {
+            cout << "Plazo invalido. Debe estar entre 6 y 48 meses.\n";
+            return;
+        }
+
+        cout << "Ingrese tasa de interes anual (ej: 0.12 para 12%): ";
+        double tasa;
+        cin >> tasa;
+
+        if (tasa < 0.05 || tasa > 0.30) {
+            cout << "Tasa invalida. Debe estar entre 5% y 30% (0.05 - 0.30).\n";
+            return;
+        }
 
         // generar id unico para prestamo
         string idPrestamo = "PREST" + to_string(cliente->getCantidadPrestamos() + 1);
 
-        Prestamo* nuevoPrestamo = new Prestamo(idPrestamo, monto, plazo, "Pendiente");
+        Prestamo* nuevoPrestamo = new Prestamo(idPrestamo, monto, tasa, plazo, "Pendiente");
 
         // verificar aprobacion con lambda
-        if (nuevoPrestamo->solicitar()) {
-            cliente->agregarPrestamo(nuevoPrestamo);
-            cout << "Prestamo aprobado exitosamente!\n";
-            cout << "ID Prestamo: " << idPrestamo << "\n";
-            cout << "Monto: S/" << monto << "\n";
-            cout << "Plazo: " << plazo << " meses\n";
-        } else {
-            cout << "Prestamo rechazado. El monto excede el limite permitido.\n";
+        if (!nuevoPrestamo->solicitar()) {
+            cout << "\nPrestamo rechazado. El monto excede el limite permitido (S/ 10,000).\n";
             delete nuevoPrestamo;
+            return;
         }
+
+        // solicitar garantia opcional
+        cout << "\nDesea adjuntar garantia? (s/n): ";
+        char respGarantia;
+        cin >> respGarantia;
+
+        if (respGarantia == 's' || respGarantia == 'S') {
+            cout << "Tipo de garantia (Vehiculo/Inmueble/Aval): ";
+            string tipoGarantia;
+            cin >> tipoGarantia;
+
+            cout << "Valor de la garantia (S/): ";
+            double valorGarantia;
+            cin >> valorGarantia;
+
+            if (valorGarantia < monto * 1.2) {
+                cout << "Advertencia: El valor de la garantia es menor al 120% del prestamo.\n";
+                cout << "Se recomienda una garantia de al menos S/ " << (monto * 1.2) << "\n";
+            }
+
+            Garantia* g = new Garantia(tipoGarantia, valorGarantia);
+            nuevoPrestamo->setGarantia(g);
+            cout << "Garantia adjuntada exitosamente.\n";
+        }
+
+        // generar cuotas automaticamente
+        nuevoPrestamo->generarCuotas();
+
+        cliente->agregarPrestamo(nuevoPrestamo);
+
+        cout << "\n=== PRESTAMO APROBADO ===\n";
+        cout << "ID Prestamo: " << idPrestamo << "\n";
+        cout << "Monto: S/ " << fixed << setprecision(2) << monto << "\n";
+        cout << "Tasa: " << (tasa * 100) << "% anual\n";
+        cout << "Plazo: " << plazo << " meses\n";
+        cout << "Monto Total a Pagar: S/ " << nuevoPrestamo->calcularMontoTotal() << "\n";
+        cout << "Cuota Mensual: S/ " << (nuevoPrestamo->calcularMontoTotal() / plazo) << "\n";
+        cout << "Cantidad de Cuotas: " << nuevoPrestamo->getCantidadCuotas() << "\n";
+
+        if (nuevoPrestamo->getGarantia()) {
+            cout << "\nGarantia: ";
+            nuevoPrestamo->getGarantia()->mostrarInfo();
+            cout << "\n";
+        }
+
+        cout << "\nUse la opcion 10 para ver el cronograma completo de pagos.\n";
     }
 
     // caso 5: generar reporte ordenado
@@ -379,6 +447,104 @@ public:
         cout << "\nDetalle de transacciones:\n";
         historicoGlobal.imprimir();
     }
+
+    // caso 10: ver cronograma de prestamo
+    void verCronograma() {
+        gestor.imprimirClientes();
+
+        if (gestor.getListaClientes().getTamano() == 0) {
+            cout << "No hay clientes registrados.\n";
+            return;
+        }
+
+        cout << "\nIngrese codigo del cliente: ";
+        string codigo;
+        cin >> codigo;
+
+        Cliente* cliente = gestor.buscarPorCodigo(codigo);
+        if (!cliente) {
+            cout << "Cliente no encontrado.\n";
+            return;
+        }
+
+        cliente->listarPrestamos();
+
+        if (cliente->getCantidadPrestamos() == 0) {
+            cout << "Este cliente no tiene prestamos.\n";
+            return;
+        }
+
+        cout << "\nSeleccione numero de prestamo (1-" << cliente->getCantidadPrestamos() << "): ";
+        int idx;
+        cin >> idx;
+
+        if (idx < 1 || idx > cliente->getCantidadPrestamos()) {
+            cout << "Numero invalido.\n";
+            return;
+        }
+
+        Prestamo* prestamo = cliente->obtenerPrestamo(idx - 1);
+        if (prestamo) {
+            prestamo->mostrarCronograma();
+        }
+    }
+
+    // caso 11: pagar cuota de prestamo
+    void pagarCuotaPrestamo() {
+        gestor.imprimirClientes();
+
+        if (gestor.getListaClientes().getTamano() == 0) {
+            cout << "No hay clientes registrados.\n";
+            return;
+        }
+
+        cout << "\nIngrese codigo del cliente: ";
+        string codigo;
+        cin >> codigo;
+
+        Cliente* cliente = gestor.buscarPorCodigo(codigo);
+        if (!cliente) {
+            cout << "Cliente no encontrado.\n";
+            return;
+        }
+
+        cliente->listarPrestamos();
+
+        if (cliente->getCantidadPrestamos() == 0) {
+            cout << "Este cliente no tiene prestamos.\n";
+            return;
+        }
+
+        cout << "\nSeleccione numero de prestamo (1-" << cliente->getCantidadPrestamos() << "): ";
+        int idx;
+        cin >> idx;
+
+        if (idx < 1 || idx > cliente->getCantidadPrestamos()) {
+            cout << "Numero invalido.\n";
+            return;
+        }
+
+        Prestamo* prestamo = cliente->obtenerPrestamo(idx - 1);
+        if (!prestamo) {
+            cout << "Prestamo no valido.\n";
+            return;
+        }
+
+        // mostrar cronograma antes de pagar
+        prestamo->mostrarCronograma();
+
+        cout << "\nIngrese numero de cuota a pagar (1-" << prestamo->getCantidadCuotas() << "): ";
+        int numCuota;
+        cin >> numCuota;
+
+        if (prestamo->pagarCuota(numCuota)) {
+            cout << "\n=== PAGO REGISTRADO EXITOSAMENTE ===\n";
+            cout << "La cuota #" << numCuota << " ha sido marcada como pagada.\n";
+        } else {
+            cout << "Error al procesar el pago de la cuota.\n";
+        }
+    }
+
 
     // getter para acceder al historico (usado por caso 9)
     HistoricoTransacciones& getHistoricoGlobal() {

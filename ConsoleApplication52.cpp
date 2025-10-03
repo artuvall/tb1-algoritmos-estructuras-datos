@@ -38,8 +38,18 @@ int main() {
             cin >> apellido;
             cout << "Email: ";
             cin >> email;
+
+            // VALIDAR CODIGO UNICO
             cout << "Codigo de Cliente (ej: 121200): ";
             cin >> codigo;
+
+            if (sistema.buscarPorCodigo(codigo) != nullptr) {
+                cout << "\n*** ERROR: Ya existe un cliente con el codigo " << codigo << " ***\n";
+                cout << "Registro cancelado. Intente con un codigo diferente.\n";
+                contadorID--; // revertir el incremento del ID
+                break;
+            }
+
             cout << "Fecha Registro (DD/MM/AAAA): ";
             cin >> fecha;
 
@@ -113,6 +123,16 @@ int main() {
         case 9: {
             // caso 9: ver historial global
             sistema.verHistorialGlobal();
+            break;
+        }
+        case 10: {
+            // caso 10: ver cronograma de prestamo
+            sistema.verCronograma();
+            break;
+        }
+        case 11: {
+            // caso 11: pagar cuota de prestamo
+            sistema.pagarCuotaPrestamo();
             break;
         }
         case 0: {

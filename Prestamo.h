@@ -4,6 +4,8 @@
 #include "Cuota.h"
 #include "Garantia.h"
 #include "ListaSimple.h"
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -11,7 +13,8 @@ class Prestamo {
 private:
     string id;
     double monto;
-    int plazo;
+    double tasaInteres; // tasa anual (ej: 0.12 = 12%)
+    int plazo; // en meses
     string estatus;
     ListaSimple<Cuota*> historialCuotas;
     Garantia* garantia;
@@ -44,22 +47,74 @@ private:
     }
 
 public:
-    Prestamo(string i, double m, int p, string est)
-        : id(i), monto(m), plazo(p), estatus(est), garantia(nullptr) {
+    Prestamo(string i, double m, double tasa, int p, string est)
+        : id(i), monto(m), tasaInteres(tasa), plazo(p), estatus(est), garantia(nullptr) {
+    }
+
+    // destructor: liberar memoria de cuotas y garantia
+    ~Prestamo() {
+        // liberar cuotas
+        for (int j = 0; j < historialCuotas.getTamano(); j++) {
+            delete *historialCuotas.obtenerEnPosicion(j);
+        }
+        // liberar garantia si existe
+        if (garantia) delete garantia;
+    }
+
+    // calcular monto total a pagar (capital + interes simple)
+    double calcularMontoTotal() const {
+        double interes = monto * tasaInteres * (plazo / 12.0);
+        return monto + interes;
+    }
+
+    // generar cuotas con amortizacion simple
+    void generarCuotas() {
+        double montoTotal = calcularMontoTotal();
+        double cuotaMensual = montoTotal / plazo;
+
+        // generar fechas de vencimiento (incrementa mes desde octubre 2025)
+        int mesInicio = 11; // noviembre 2025 (primer vencimiento)
+        int anioInicio = 2025;
+
+        for (int i = 0; i < plazo; i++) {
+            int mesVenc = mesInicio + i;
+            int anioVenc = anioInicio;
+
+            // ajustar anio si pasa de diciembre
+            while (mesVenc > 12) {
+                mesVenc -= 12;
+                anioVenc++;
+            }
+
+            // formato: MM/YYYY
+            string fechaVenc = (mesVenc < 10 ? "0" : "") + to_string(mesVenc) + "/" + to_string(anioVenc);
+
+            Cuota* c = new Cuota(i + 1, cuotaMensual, fechaVenc);
+            historialCuotas.insertarAlFinal(c);
+        }
     }
 
     bool solicitar() {
         // lambda 1 integrante 1: aprobar prestamo segun monto
-        auto aprobar = [this]() { return monto < 5000.0; };
+        auto aprobar = [this]() { return monto <= 10000.0; };
         return aprobar();
     }
 
+    // metodos para manejar garantia
+    void setGarantia(Garantia* g) { garantia = g; }
+    Garantia* getGarantia() const { return garantia; }
+
     void agregarCuota(Cuota* c) { historialCuotas.insertarAlFinal(c); }
 
-    bool pagarCuota() {
-        // lambda 2 integrante 1: pagar primera cuota no pagada
-        auto pagar = [](Cuota* c) { c->pagar(); return true; };
-        return true; // aplica a primera no pagada
+    bool pagarCuota(int numCuota) {
+        // lambda 2 integrante 1: pagar cuota especifica
+        if (numCuota < 1 || numCuota > historialCuotas.getTamano()) {
+            cout << "Numero de cuota invalido.\n";
+            return false;
+        }
+
+        Cuota* cuota = *historialCuotas.obtenerEnPosicion(numCuota - 1);
+        return cuota->pagar();
     }
 
     // quicksort integrante 1: ordenar cuotas
@@ -73,10 +128,9 @@ public:
             arr[i] = *historialCuotas.obtenerEnPosicion(i);
         }
 
-        // lambda 3 integrante 1: comparador para ordenar por numero de cuota
+        // lambda 3 integrante 1: comparador para ordenar por numero de cuota (menor a mayor)
         auto comparador = [](Cuota* a, Cuota* b) {
-            // comparar por numero de cuota (menor a mayor)
-            return true; // simplificado: en implementacion real comparar numeros
+            return a->getNum() < b->getNum();
         };
 
         quickSortRecursivo(arr, 0, n - 1, comparador);
@@ -90,9 +144,37 @@ public:
         delete[] arr;
     }
 
+    // mostrar cronograma completo de pagos
+    void mostrarCronograma() const {
+        cout << "\n=== CRONOGRAMA DE PAGOS ===\n";
+        cout << "Prestamo ID: " << id << "\n";
+        cout << "Monto Original: S/ " << fixed << setprecision(2) << monto << "\n";
+        cout << "Tasa Interes: " << (tasaInteres * 100) << "% anual\n";
+        cout << "Plazo: " << plazo << " meses\n";
+        cout << "Monto Total a Pagar: S/ " << calcularMontoTotal() << "\n";
+        cout << "Cuota Mensual: S/ " << (calcularMontoTotal() / plazo) << "\n";
+
+        if (garantia) {
+            cout << "Garantia: ";
+            garantia->mostrarInfo();
+            cout << "\n";
+        }
+
+        cout << string(60, '-') << "\n";
+
+        for (int i = 0; i < historialCuotas.getTamano(); i++) {
+            Cuota* c = *historialCuotas.obtenerEnPosicion(i);
+            c->mostrarInfo();
+        }
+    }
+
+    // getters
     string getId() const { return id; }
     double getMonto() const { return monto; }
+    double getTasaInteres() const { return tasaInteres; }
+    int getPlazo() const { return plazo; }
     string getEstatus() const { return estatus; }
+    int getCantidadCuotas() const { return historialCuotas.getTamano(); }
 };
 
 #endif

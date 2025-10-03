@@ -77,7 +77,7 @@ public:
     }
 
     // metodo custom 2 integrante 1: obtener elemento en posicion
-    T* obtenerEnPosicion(int pos) {
+    T* obtenerEnPosicion(int pos) const {
         if (pos < 0 || pos >= tamano) return nullptr;
         Nodo<T>* temp = cabeza;
         for (int i = 0; i < pos; i++) {
@@ -109,7 +109,7 @@ public:
         }
     }
 
-    int getTamano() { return tamano; }
+    int getTamano() const { return tamano; }
 
     // metodo auxiliar para obtener cabeza (necesario para pila)
     Nodo<T>* getCabeza() { return cabeza; }
