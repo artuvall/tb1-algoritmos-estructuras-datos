@@ -2,6 +2,8 @@
 #ifndef CUENTAAHORROS_H
 #define CUENTAAHORROS_H
 #include "CuentaBancaria.h" // incluye la clase base
+#include "Retiro.h"
+#include "Deposito.h"
 using namespace std;
 
 class CuentaAhorros : public CuentaBancaria {

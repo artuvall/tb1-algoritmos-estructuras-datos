@@ -26,4 +26,5 @@ add_executable(ConsoleApplication52
     Prestamo.h
     SistemaFinanciero.h
     Transaccion.h
+        Retiro.h
 )
