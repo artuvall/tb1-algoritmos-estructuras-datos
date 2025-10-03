@@ -17,7 +17,17 @@ public:
         : id(i), monto(m), fecha(f), tipo(t) {
     }
 
+    // destructor virtual para evitar problemas con delete
+    virtual ~Transaccion() {}
+
+    // metodos virtuales puros
     virtual bool ejecutar() = 0;
+
+    // getters publicos para acceder a los datos
+    string getId() const { return id; }
+    double getMonto() const { return monto; }
+    string getFecha() const { return fecha; }
+    string getTipo() const { return tipo; }
 };
 
 #endif

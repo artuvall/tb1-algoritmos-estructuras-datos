@@ -10,6 +10,9 @@ int main() {
     SistemaFinanciero sistema;
     int opcion;
 
+    // contador para auto-generar IDs de clientes
+    static int contadorID = 1;
+
     cout << "\n=== BIENVENIDO AL SISTEMA FINANCIERO ===\n";
 
     do {
@@ -19,18 +22,23 @@ int main() {
 
         switch (opcion) {
         case 1: {
-            // caso 1: registrar cliente
+            // caso 1: registrar cliente con ID auto-generado
             cout << "\n=== REGISTRAR NUEVO CLIENTE ===\n";
-            string id, nombre, apellido, email, codigo, fecha;
-            cout << "ID: ";
-            cin >> id;
+
+            // auto-generar ID secuencial (CLI00001, CLI00002, etc)
+            string id = "CLI" + string(5 - to_string(contadorID).length(), '0') + to_string(contadorID);
+            contadorID++;
+
+            cout << "ID Auto-generado: " << id << "\n\n";
+
+            string nombre, apellido, email, codigo, fecha;
             cout << "Nombre: ";
             cin >> nombre;
             cout << "Apellido: ";
             cin >> apellido;
             cout << "Email: ";
             cin >> email;
-            cout << "Codigo: ";
+            cout << "Codigo de Cliente (ej: 121200): ";
             cin >> codigo;
             cout << "Fecha Registro (DD/MM/AAAA): ";
             cin >> fecha;
@@ -38,7 +46,7 @@ int main() {
             Cliente* nuevo = new Cliente(id, nombre, apellido, email, codigo, fecha);
 
             // preguntar tipo de persona y asignar detalles
-            cout << "Tipo de cliente (1 = persona natural, 2 = persona juridica): ";
+            cout << "\nTipo de cliente (1 = persona natural, 2 = persona juridica): ";
             int tipo;
             cin >> tipo;
             if (tipo == 1) {
@@ -90,6 +98,21 @@ int main() {
         case 6: {
             // caso 6: guardar datos
             sistema.guardarDatos();
+            break;
+        }
+        case 7: {
+            // caso 7: procesar siguiente transaccion
+            sistema.procesarSiguienteTransaccion();
+            break;
+        }
+        case 8: {
+            // caso 8: deshacer ultima operacion
+            sistema.deshacerUltimaOperacion();
+            break;
+        }
+        case 9: {
+            // caso 9: ver historial global
+            sistema.verHistorialGlobal();
             break;
         }
         case 0: {

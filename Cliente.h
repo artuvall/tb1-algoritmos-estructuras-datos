@@ -93,8 +93,8 @@ public:
         cout << "\n=== CUENTAS DEL CLIENTE ===\n";
         for (int i = 0; i < cuentas.getTamano(); i++) {
             CuentaBancaria* cuenta = *cuentas.obtenerEnPosicion(i);
-            cout << i + 1 << ". Cuenta: " << cuenta->getNumCuenta()
-                 << " | Saldo: $" << cuenta->getSaldo() << "\n";
+            cout << (i + 1) << ". Numero Cuenta: " << cuenta->getNumCuenta()
+                 << " | Saldo: S/ " << cuenta->getSaldo() << "\n";
         }
     }
 
