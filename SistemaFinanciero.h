@@ -164,7 +164,6 @@ public:
         Interfaz::mostrarEstadistica("Total generados", clientesCreados);
         Interfaz::mostrarEstadistica("Total en sistema", gestor.getListaClientes().getTamano());
 
-        cout << "\nPuede usar estos clientes para probar los algoritmos de ordenamiento.\n";
     }
 
     // NUEVO: Generar transacciones aleatorias para pruebas
@@ -267,10 +266,6 @@ public:
         Interfaz::mostrarEstadistica("Total generadas", transaccionesGeneradas);
         Interfaz::mostrarEstadistica("En cola de procesamiento", colaTransacciones.getTamano());
 
-        cout << "\nUSO:\n";
-        cout << "1. Use 'Procesar Siguiente Transaccion' para ejecutarlas\n";
-        cout << "2. Las fechas varian entre 2000 y 2025 (cualquier mes/dia/anio)\n";
-        cout << "3. Cada cuenta tendra fechas muy mezcladas para demostrar MergeSort\n";
     }
 
     // NUEVO: Generar prestamos aleatorios para pruebas
@@ -355,7 +350,7 @@ public:
 
     // NUEVO: Mostrar menu principal reorganizado por categorias
     void mostrarMenuPrincipal() {
-        Interfaz::mostrarTitulo("CAJA HUANCAYO - Sistema Financiero", 60);
+        Interfaz::mostrarTitulo("CAJA BUENAVISTA - Sistema Financiero", 60);
         cout << "\n";
         cout << "  [1] GESTION DE CLIENTES\n";
         cout << "      - Registrar Cliente\n";
@@ -567,7 +562,7 @@ public:
         Interfaz::mostrarEstadistica("Transacciones pendientes", colaTransacciones.getTamano());
 
         if (colaTransacciones.getTamano() > 0) {
-            cout << "\nLas transacciones seran procesadas en orden FIFO (primero en entrar, primero en salir)\n";
+            cout << "\nLas transacciones seran procesadas en orden primero en entrar, primero en salir\n";
             cout << "Use 'Procesar Siguiente Transaccion' en el menu de Operaciones Bancarias\n";
         } else {
             cout << "\nNo hay transacciones pendientes en la cola.\n";
@@ -580,133 +575,10 @@ public:
         Interfaz::mostrarEstadistica("Operaciones deshacibles", pilaDeshacer.getTamano());
 
         if (pilaDeshacer.getTamano() > 0) {
-            cout << "\nLas operaciones se deshacen en orden LIFO (ultima en entrar, primera en salir)\n";
+            cout << "\nLas operaciones se deshacen en orden ultima en entrar, primera en salir\n";
             cout << "Use 'Deshacer Ultima Operacion' en el menu de Operaciones Bancarias\n";
         } else {
             cout << "\nNo hay operaciones para deshacer.\n";
-        }
-    }
-
-    // NUEVO: Demos de algoritmos
-    void demoQuickSort() {
-        cout << "\n=== DEMO: QuickSort en Prestamos ===\n";
-        cout << "El QuickSort ordena las cuotas de un prestamo por numero.\n";
-        cout << "Esta implementacion usa recursion y particion.\n";
-        cout << "Complejidad: O(n log n) promedio\n\n";
-
-        gestor.imprimirClientes();
-        if (gestor.getListaClientes().getTamano() == 0) {
-            Interfaz::mostrarAdvertencia("No hay clientes para demostrar.");
-            return;
-        }
-
-        string codigo = Interfaz::solicitarCodigo();
-        Cliente* cliente = gestor.buscarPorCodigo(codigo);
-
-        if (!cliente || cliente->getCantidadPrestamos() == 0) {
-            Interfaz::mostrarAdvertencia("Cliente sin prestamos.");
-            return;
-        }
-
-        cliente->listarPrestamos();
-        int idx = Interfaz::solicitarIndice("prestamo", 1, cliente->getCantidadPrestamos());
-        Prestamo* prestamo = cliente->obtenerPrestamo(idx - 1);
-
-        if (prestamo) {
-            cout << "\nOrdenando cuotas con QuickSort...\n";
-            prestamo->ordenarCuotasQuick();
-            prestamo->mostrarCronograma();
-            Interfaz::mostrarExito("QuickSort ejecutado exitosamente!");
-        }
-    }
-
-    void demoHeapSort() {
-        cout << "\n=== DEMO: HeapSort en Clientes ===\n";
-        cout << "El HeapSort ordena clientes por codigo usando un heap binario.\n";
-        cout << "Complejidad: O(n log n) garantizado\n\n";
-
-        cout << "ANTES del ordenamiento:\n";
-        gestor.imprimirClientes();
-
-        cout << "\nOrdenando con HeapSort...\n";
-        gestor.ordenarClientesHeap();
-
-        cout << "\nDESPUES del ordenamiento:\n";
-        gestor.imprimirClientes();
-        Interfaz::mostrarExito("HeapSort ejecutado exitosamente!");
-    }
-
-    void demoShellSort() {
-        cout << "\n=== DEMO: ShellSort en Transacciones ===\n";
-        cout << "El ShellSort ordena transacciones usando secuencia de gaps.\n";
-        cout << "Complejidad: O(n log n) a O(n^1.5) segun secuencia\n\n";
-
-        if (historicoGlobal.getTamano() == 0) {
-            Interfaz::mostrarAdvertencia("No hay transacciones en el historial.");
-            return;
-        }
-
-        cout << "ANTES del ordenamiento:\n";
-        historicoGlobal.imprimir();
-
-        cout << "\nOrdenando con ShellSort...\n";
-        historicoGlobal.ordenarShell();  // CORREGIDO: era ordenarPorMontoShell()
-
-        cout << "\nDESPUES del ordenamiento:\n";
-        historicoGlobal.imprimir();
-        Interfaz::mostrarExito("ShellSort ejecutado exitosamente!");
-    }
-
-    void demoMergeSort() {
-        cout << "\n=== DEMO: MergeSort en Historial de Cuenta ===\n";
-        cout << "El MergeSort ordena transacciones de una cuenta por fecha.\n";
-        cout << "Usa divide y conquista con fusion de sublistas.\n";
-        cout << "Complejidad: O(n log n) garantizado\n\n";
-
-        gestor.imprimirClientes();
-        if (gestor.getListaClientes().getTamano() == 0) {
-            Interfaz::mostrarAdvertencia("No hay clientes registrados.");
-            return;
-        }
-
-        string codigo = Interfaz::solicitarCodigo();
-        Cliente* cliente = gestor.buscarPorCodigo(codigo);
-
-        if (!cliente || cliente->getCantidadCuentas() == 0) {
-            Interfaz::mostrarAdvertencia("Cliente sin cuentas.");
-            return;
-        }
-
-        cliente->listarCuentas();
-        int idx = Interfaz::solicitarIndice("cuenta", 1, cliente->getCantidadCuentas());
-        CuentaBancaria* cuenta = cliente->obtenerCuenta(idx - 1);
-
-        if (cuenta) {
-            cout << "\nOrdenando historial con MergeSort...\n";
-            cuenta->ordenarHistorialMerge();
-            Interfaz::mostrarExito("MergeSort ejecutado exitosamente!");
-        }
-    }
-
-    void demoFiltrosLambda() {
-        cout << "\n=== DEMO: Filtros con Lambdas ===\n";
-        cout << "Los lambdas permiten filtrar datos con expresiones concisas.\n\n";
-
-        double montoMinimo = Interfaz::solicitarMonto("saldo minimo para filtrar");
-
-        cout << "\nFiltrando clientes con saldo >= S/ " << montoMinimo << "...\n";
-        ListaSimple<Cliente*> filtrados = gestor.filtrarPorSaldo(montoMinimo);
-
-        cout << "\n=== CLIENTES FILTRADOS ===\n";
-        if (filtrados.getTamano() == 0) {
-            cout << "No se encontraron clientes con ese saldo.\n";
-        } else {
-            auto imprimir = [](Cliente* cl) {
-                cout << "- " << cl->getNombre() << " (Codigo: " << cl->getCodigo()
-                     << ") - Saldo Total: S/ " << cl->getSaldoTotal() << "\n";
-            };
-            filtrados.imprimir(imprimir);
-            Interfaz::mostrarExito("Lambda ejecutado exitosamente!");
         }
     }
 

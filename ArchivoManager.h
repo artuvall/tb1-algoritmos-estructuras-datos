@@ -131,7 +131,7 @@ public:
         int n = lista.getTamano();
         if (n <= 1) return;
 
-        cout << "\n=== ORDENANDO CON SELECTION SORT ===\n";
+        cout << "\n=== ORDENANDO ===\n";
 
         // Algoritmo Selection Sort
         // En cada iteracion encuentra el minimo y lo coloca en su posicion
