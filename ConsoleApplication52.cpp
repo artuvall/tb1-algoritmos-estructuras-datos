@@ -29,6 +29,7 @@ int main() {
             cout << "1. Registrar Nuevo Cliente\n";
             cout << "2. Abrir Cuenta Bancaria\n";
             cout << "3. Ver Reporte Ordenado de Clientes\n";
+            cout << "4. Generar Clientes Aleatorios (Demo)\n";
             cout << "0. Volver al Menu Principal\n";
             Interfaz::mostrarSeparador('-', 50);
             cout << "Seleccione opcion: ";
@@ -80,6 +81,16 @@ int main() {
                 sistema.abrirCuenta();
             } else if (subopcion == 3) {
                 sistema.generarReporteOrdenado();
+            } else if (subopcion == 4) {
+                cout << "\nCuantos clientes desea generar? (1-50): ";
+                int cantidad;
+                cin >> cantidad;
+                if (cantidad < 1 || cantidad > 50) {
+                    Interfaz::mostrarAdvertencia("Cantidad invalida. Generando 10 clientes por defecto.");
+                    cantidad = 10;
+                }
+                sistema.generarClientesAleatorios(cantidad);
+                contadorID += cantidad; // Actualizar contador
             }
             break;
         }

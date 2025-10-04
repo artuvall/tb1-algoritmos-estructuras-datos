@@ -22,8 +22,8 @@ public:
 
     bool depositar(double monto) override {
         saldo += monto;
-        Transaccion* t = new Deposito("DEP-" + numCuenta, monto, "2025-04-05", "Deposito", "Efectivo");
-        agregarTransaccion(t);
+        // nota: la transaccion ya viene creada con la fecha correcta desde el sistema
+        // no crear una nueva aqui para no perder la fecha aleatoria
         return true;
     }
 
@@ -32,8 +32,8 @@ public:
         auto dentroLimite = [this](double m) { return m <= limiteRetiroDiario; };
         if (monto <= saldo && dentroLimite(monto)) {
             saldo -= monto;
-            Transaccion* t = new Retiro("RET-" + numCuenta, monto, "2025-04-05", "Retiro", "Cajero");
-            agregarTransaccion(t);
+            // nota: la transaccion ya viene creada con la fecha correcta desde el sistema
+            // no crear una nueva aqui para no perder la fecha aleatoria
             return true;
         }
         return false;

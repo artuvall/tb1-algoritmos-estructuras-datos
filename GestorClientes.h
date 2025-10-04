@@ -140,8 +140,10 @@ public:
    void imprimirClientes() {
        cout << "\n=== LISTA DE CLIENTES ===\n";
        auto imprimir = [](Cliente* cl) {
-           cout << "ID: " << cl->getId() << " | Nombre: " << cl->getNombre()
-                << " | Codigo: " << cl->getCodigo() << endl;
+           cout << "ID: " << cl->getId()
+                << " | Nombre: " << cl->getNombre()
+                << " | Codigo: " << cl->getCodigo()
+                << " | Cuentas: " << cl->getCantidadCuentas() << "\n";
        };
        listaClientes.imprimir(imprimir);
    }

@@ -76,6 +76,10 @@ public:
         int mesInicio = 11; // noviembre 2025 (primer vencimiento)
         int anioInicio = 2025;
 
+        // crear array temporal para desordenar cuotas
+        Cuota** tempArray = new Cuota*[plazo];
+
+        // crear cuotas en orden secuencial primero
         for (int i = 0; i < plazo; i++) {
             int mesVenc = mesInicio + i;
             int anioVenc = anioInicio;
@@ -89,9 +93,25 @@ public:
             // formato: MM/YYYY
             string fechaVenc = (mesVenc < 10 ? "0" : "") + to_string(mesVenc) + "/" + to_string(anioVenc);
 
-            Cuota* c = new Cuota(i + 1, cuotaMensual, fechaVenc);
-            historialCuotas.insertarAlFinal(c);
+            tempArray[i] = new Cuota(i + 1, cuotaMensual, fechaVenc);
         }
+
+        // algoritmo fisher-yates shuffle para desordenar cuotas
+        // esto garantiza que cada cuota tenga igual probabilidad de estar en cualquier posicion
+        for (int i = plazo - 1; i > 0; i--) {
+            int j = rand() % (i + 1);
+            // intercambiar tempArray[i] con tempArray[j]
+            Cuota* temp = tempArray[i];
+            tempArray[i] = tempArray[j];
+            tempArray[j] = temp;
+        }
+
+        // insertar cuotas desordenadas en la lista
+        for (int i = 0; i < plazo; i++) {
+            historialCuotas.insertarAlFinal(tempArray[i]);
+        }
+
+        delete[] tempArray;
     }
 
     bool solicitar() {

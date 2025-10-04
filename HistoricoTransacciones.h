@@ -4,6 +4,7 @@
 #include "ListaDoble.h"
 #include "Transaccion.h"
 #include <iostream>
+#include <iomanip> // para setprecision
 // HistoricoTransacciones.h
 using namespace std;
 
@@ -68,11 +69,15 @@ public:
         return lista.filtrar(filtro);
     }
 
-    // metodo para imprimir historial
+    // metodo para imprimir historial con detalles completos
     void imprimir() {
         cout << "\n=== HISTORIAL DE TRANSACCIONES ===\n";
         auto imprimirTransaccion = [](Transaccion* t) {
-            cout << "Transaccion registrada." << endl;
+            // mostrar informacion detallada de cada transaccion
+            cout << "ID: " << t->getId()
+                 << " | Tipo: " << t->getTipo()
+                 << " | Monto: S/ " << fixed << setprecision(2) << t->getMonto()
+                 << " | Fecha: " << t->getFecha() << "\n";
         };
         lista.aplicar(imprimirTransaccion);
     }

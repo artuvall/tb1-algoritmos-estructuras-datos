@@ -17,17 +17,16 @@ public:
 
     bool depositar(double monto) override {
         saldo += monto;
-        Transaccion* t = new Deposito("DEP-" + numCuenta, monto, "2025-04-05", "Deposito", "Transferencia");
-        agregarTransaccion(t);
+        // nota: la transaccion ya viene creada con la fecha correcta desde el sistema
+        // no crear una nueva aqui para no perder la fecha aleatoria
         return true;
     }
 
     bool retirar(double monto) override {
         if (monto <= saldo + sobreGiro) {
             saldo -= monto;
-            // Crear registro de retiro en el historial
-            Transaccion* t = new Retiro("RET-" + numCuenta, monto, "2025-04-05", "Retiro", "Ventanilla");
-            agregarTransaccion(t);
+            // nota: la transaccion ya viene creada con la fecha correcta desde el sistema
+            // no crear una nueva aqui para no perder la fecha aleatoria
             return true;
         }
         return false;

@@ -123,6 +123,24 @@ public:
         };
         formatear();
     }
+
+    // NUEVO: Mostrar historial de transacciones
+    // Complejidad: O(n) donde n es cantidad de transacciones
+    void mostrarHistorial() {
+        if (historialTransacciones.getTamano() == 0) {
+            cout << "No hay transacciones registradas en esta cuenta.\n";
+            return;
+        }
+
+        auto mostrarTransaccion = [](Transaccion* t) {
+            cout << "ID: " << t->getId()
+                 << " | Fecha: " << t->getFecha()
+                 << " | Monto: S/ " << t->getMonto()
+                 << " | Tipo: " << t->getTipo() << "\n";
+        };
+
+        historialTransacciones.aplicar(mostrarTransaccion);
+    }
 };
 
 #endif

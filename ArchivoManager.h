@@ -2,8 +2,6 @@
 #define ARCHIVOMANAGER_H
 // ArchivoManager.h - Gestion de archivos de texto
 // Incluye Selection Sort como algoritmo de ordenamiento adicional
-// PRIORIDAD ALTA: Implementacion completa de lectura/escritura de archivos
-
 #include "ListaSimple.h"
 #include "Cliente.h"
 #include "PersonaNatural.h"
@@ -12,7 +10,6 @@
 #include <sstream>
 #include <iostream>
 #include <string>
-
 using namespace std;
 
 class ArchivoManager {
