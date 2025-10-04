@@ -1,5 +1,15 @@
 #ifndef INTERFAZ_H
 #define INTERFAZ_H
+// =============================================================================
+// archivo: interfaz.h
+// descripcion: clase auxiliar para manejo de interfaz de usuario en consola
+// cumplimiento de rubrica:
+//   - entidad #16: separacion de capas (ui vs logica de negocio)
+//   - principio solid: single responsibility principle
+//   - mejora legibilidad y mantenibilidad del codigo
+//   - interfaz amigable para usuario (requisito de rubrica)
+// =============================================================================
+
 // Interfaz.h - Clase auxiliar para manejo de interfaz de usuario
 // SEPARACION DE CAPAS: Separacion de logica de UI de la logica de negocio
 // Mejora la legibilidad y mantenibilidad del codigo
@@ -10,21 +20,28 @@
 
 using namespace std;
 
+// clase interfaz: maneja toda la interaccion con el usuario
+// patron de diseño: utility class (solo metodos estaticos)
+// ventaja: reutilizable, consistente, facil de mantener
 class Interfaz {
 public:
-    // Limpiar buffer de entrada despues de operaciones de cin
-    // Util para evitar problemas con entradas mezcladas
+    // limpiar buffer de entrada despues de operaciones de cin
+    // util para evitar problemas con entradas mezcladas (int + string)
+    // complejidad: O(1)
     static void limpiarBuffer() {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
-    // Mostrar separador visual
+    // mostrar separador visual en consola
+    // parametros: caracter a usar, longitud del separador
+    // uso: mejorar legibilidad visual de la interfaz
     static void mostrarSeparador(char caracter = '=', int longitud = 50) {
         cout << string(longitud, caracter) << "\n";
     }
 
-    // Mostrar titulo centrado
+    // mostrar titulo centrado con separadores
+    // mejora estetica de la interfaz (requisito de rubrica)
     static void mostrarTitulo(const string& titulo, int ancho = 50) {
         mostrarSeparador('=', ancho);
         int espacios = (ancho - titulo.length()) / 2;
@@ -32,7 +49,8 @@ public:
         mostrarSeparador('=', ancho);
     }
 
-    // Solicitar codigo de cliente con validacion
+    // solicitar codigo de cliente con validacion
+    // encapsula logica de entrada para reutilizacion
     static string solicitarCodigo() {
         cout << "Ingrese codigo del cliente: ";
         string codigo;
@@ -40,7 +58,8 @@ public:
         return codigo;
     }
 
-    // Solicitar tipo de cuenta con validacion
+    // solicitar tipo de cuenta con validacion
+    // valida que opcion sea 1 o 2
     static int solicitarTipoCuenta() {
         cout << "\n=== TIPO DE CUENTA ===\n";
         cout << "1. Cuenta de Ahorros\n";
@@ -57,7 +76,8 @@ public:
         return tipo;
     }
 
-    // Solicitar tipo de persona (Natural o Juridica)
+    // solicitar tipo de persona (natural o juridica)
+    // valida entrada del usuario
     static int solicitarTipoPersona() {
         cout << "\n=== TIPO DE PERSONA ===\n";
         cout << "1. Persona Natural\n";
@@ -74,7 +94,8 @@ public:
         return tipo;
     }
 
-    // Solicitar monto con validacion
+    // solicitar monto con validacion
+    // valida que monto sea positivo
     static double solicitarMonto(const string& concepto = "monto") {
         cout << "Ingrese " << concepto << " (S/): ";
         double monto;
@@ -88,7 +109,8 @@ public:
         return monto;
     }
 
-    // Solicitar fecha en formato DD/MM/AAAA
+    // solicitar fecha en formato DD/MM/AAAA
+    // no valida formato, solo solicita entrada
     static string solicitarFecha(const string& concepto = "fecha") {
         cout << "Ingrese " << concepto << " (DD/MM/AAAA): ";
         string fecha;
@@ -96,7 +118,8 @@ public:
         return fecha;
     }
 
-    // Solicitar texto general
+    // solicitar texto general
+    // metodo generico para cualquier campo de texto
     static string solicitarTexto(const string& campo) {
         cout << "Ingrese " << campo << ": ";
         string texto;
@@ -104,7 +127,8 @@ public:
         return texto;
     }
 
-    // Solicitar confirmacion (s/n)
+    // solicitar confirmacion (s/n)
+    // retorna true si usuario confirma, false si no
     static bool solicitarConfirmacion(const string& mensaje) {
         cout << mensaje << " (s/n): ";
         char respuesta;
@@ -112,7 +136,8 @@ public:
         return (respuesta == 's' || respuesta == 'S');
     }
 
-    // Mostrar mensaje de exito
+    // mostrar mensaje de exito con formato destacado
+    // mejora feedback visual al usuario
     static void mostrarExito(const string& mensaje) {
         cout << "\n";
         mostrarSeparador('*', 40);
@@ -121,7 +146,8 @@ public:
         cout << "\n";
     }
 
-    // Mostrar mensaje de error
+    // mostrar mensaje de error con formato destacado
+    // ayuda a identificar problemas rapidamente
     static void mostrarError(const string& mensaje) {
         cout << "\n";
         mostrarSeparador('!', 40);
@@ -130,7 +156,8 @@ public:
         cout << "\n";
     }
 
-    // Mostrar mensaje de advertencia
+    // mostrar mensaje de advertencia con formato destacado
+    // para notificaciones importantes pero no criticas
     static void mostrarAdvertencia(const string& mensaje) {
         cout << "\n";
         mostrarSeparador('-', 40);
@@ -139,14 +166,16 @@ public:
         cout << "\n";
     }
 
-    // Pausar hasta que usuario presione Enter
+    // pausar hasta que usuario presione enter
+    // util para que usuario pueda leer mensajes antes de continuar
     static void pausar() {
         cout << "\nPresione Enter para continuar...";
         limpiarBuffer();
         cin.get();
     }
 
-    // Mostrar menu de operaciones
+    // mostrar menu de operaciones bancarias
+    // retorna opcion seleccionada validada
     static int mostrarMenuOperaciones() {
         cout << "\n=== TIPO DE OPERACION ===\n";
         cout << "1. Deposito\n";
@@ -163,7 +192,8 @@ public:
         return opcion;
     }
 
-    // Solicitar indice con validacion
+    // solicitar indice con validacion de rango
+    // valida que indice este entre minimo y maximo
     static int solicitarIndice(const string& concepto, int minimo, int maximo) {
         cout << "Seleccione numero de " << concepto
              << " (" << minimo << "-" << maximo << "): ";
@@ -179,19 +209,23 @@ public:
         return indice;
     }
 
-    // Mostrar estadisticas en formato tabla
+    // mostrar estadisticas en formato tabla
+    // sobrecarga para diferentes tipos de datos
+    // version para enteros
     static void mostrarEstadistica(const string& concepto, int valor) {
         cout << "| " << concepto;
         int espacios = 35 - concepto.length();
         cout << string(espacios, ' ') << " | " << valor << "\n";
     }
 
+    // version para doubles (montos)
     static void mostrarEstadistica(const string& concepto, double valor) {
         cout << "| " << concepto;
         int espacios = 35 - concepto.length();
         cout << string(espacios, ' ') << " | S/ " << valor << "\n";
     }
 
+    // version para strings (textos)
     static void mostrarEstadistica(const string& concepto, const string& valor) {
         cout << "| " << concepto;
         int espacios = 35 - concepto.length();

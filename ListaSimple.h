@@ -1,5 +1,17 @@
 #ifndef LISTASIMPLE_H
 #define LISTASIMPLE_H
+// =============================================================================
+// archivo: listasimple.h
+// descripcion: estructura de datos lista enlazada simple generica
+// cumplimiento de rubrica:
+//   - estructura de datos #1 (integrante 1): lista enlazada simple
+//   - uso de templates: estructura generica <T>
+//   - metodos personalizados: insertaralinicio, obtenerenposicion, invertir
+//   - recursividad integrante 1: contarrecursivo
+//   - optimizacion critica: puntero cola para insertar al final en O(1)
+//   - uso de lambdas: en buscar() e imprimir()
+// =============================================================================
+
 // ListaSimple.h - Estructura generica con templates
 // metodos implementados por integrante 1
 // OPTIMIZACION: Agregado puntero a cola para O(1) en insertarAlFinal()
@@ -8,25 +20,34 @@
 
 using namespace std;
 
+// nodo simple: estructura basica para lista enlazada simple
+// solo tiene puntero al siguiente (unidireccional)
 template <typename T>
 struct Nodo {
-    T dato;
-    Nodo* siguiente;
+    T dato;              // dato almacenado (puede ser cualquier tipo)
+    Nodo* siguiente;     // puntero al siguiente nodo
+
+    // constructor: inicializa dato y siguiente en null
     Nodo(T d) : dato(d), siguiente(nullptr) {}
 };
 
+// *** estructura de datos integrante 1: lista enlazada simple ***
+// implementacion generica usando templates (cumple requisito de programacion generica)
 template <typename T>
 class ListaSimple {
 private:
-    Nodo<T>* cabeza;
-    Nodo<T>* cola;  // NUEVO: puntero a cola para optimizacion O(1)
-    int tamano;
+    Nodo<T>* cabeza;     // puntero al primer nodo
+    Nodo<T>* cola;       // *** optimizacion: puntero al ultimo nodo para O(1) ***
+    int tamano;          // contador de elementos
 
 public:
-    // Constructor: inicializar cabeza y cola
+    // constructor: inicializa lista vacia
+    // complejidad: O(1)
     ListaSimple() : cabeza(nullptr), cola(nullptr), tamano(0) {}
 
-    // Destructor: liberar memoria de todos los nodos
+    // destructor: liberar memoria de todos los nodos
+    // complejidad: O(n) - debe recorrer y eliminar cada nodo
+    // importante para evitar memory leaks
     ~ListaSimple() {
         Nodo<T>* temp;
         while (cabeza) {
@@ -34,32 +55,40 @@ public:
             cabeza = cabeza->siguiente;
             delete temp;
         }
-        cabeza = cola = nullptr;  // MEJORA: asegurar que cola tambien sea nullptr
+        cabeza = cola = nullptr;
     }
 
-    // OPTIMIZADO: Complejidad mejorada de O(n) a O(1)
-    // Ahora usa puntero directo a cola en vez de recorrer toda la lista
+    // *** metodo optimizado - cambio critico de O(n) a O(1) ***
+    // antes: recorria toda la lista hasta el final (O(n))
+    // ahora: usa puntero directo a cola (O(1))
+    // justificacion: operacion muy frecuente en el sistema
+    // analisis de complejidad: O(1) constante
     void insertarAlFinal(T dato) {
         Nodo<T>* nuevo = new Nodo<T>(dato);
         if (!cabeza) {
-            // Lista vacia: cabeza y cola apuntan al mismo nodo
+            // lista vacia: cabeza y cola apuntan al mismo nodo
             cabeza = cola = nuevo;
         } else {
-            // Lista no vacia: agregar al final usando puntero cola
+            // lista no vacia: agregar al final usando puntero cola
             cola->siguiente = nuevo;
-            cola = nuevo;  // actualizar puntero cola
+            cola = nuevo;  // actualizar puntero cola en O(1)
         }
         tamano++;
     }
 
-    // metodo custom 1 integrante 1: insertar al inicio
-    // Complejidad: O(1)
+    // *** metodo personalizado #1 integrante 1: insertar al inicio ***
+    // complejidad: O(1) - solo actualiza punteros, no recorre lista
+    // es O(1) porque:
+    //   1. crear nodo nuevo: O(1)
+    //   2. asignar siguiente = cabeza: O(1)
+    //   3. actualizar cabeza: O(1)
+    // total: O(1) + O(1) + O(1) = O(1)
     void insertarAlInicio(T dato) {
         Nodo<T>* nuevo = new Nodo<T>(dato);
         nuevo->siguiente = cabeza;
         cabeza = nuevo;
 
-        // MEJORA: actualizar cola si lista estaba vacia
+        // actualizar cola si lista estaba vacia
         if (!cola) {
             cola = nuevo;
         }
@@ -67,8 +96,10 @@ public:
         tamano++;
     }
 
-    // Buscar elemento con predicado (lambda)
-    // Complejidad: O(n) - recorre hasta encontrar o llegar al final
+    // buscar elemento con predicado (lambda)
+    // complejidad: O(n) - peor caso recorre toda la lista
+    // parametro: funcion lambda que define criterio de busqueda
+    // retorna: puntero al dato encontrado o nullptr
     T* buscar(std::function<bool(T)> predicado) {
         Nodo<T>* temp = cabeza;
         while (temp) {
@@ -78,17 +109,18 @@ public:
         return nullptr;
     }
 
-    // Eliminar nodo en posicion especifica
-    // Complejidad: O(n) - necesita recorrer hasta la posicion
+    // eliminar nodo en posicion especifica
+    // complejidad: O(n) - necesita recorrer hasta la posicion
+    // actualiza puntero cola si se elimina el ultimo elemento
     bool eliminar(int pos) {
         if (pos < 0 || pos >= tamano) return false;
 
         Nodo<T>* temp = cabeza;
         if (pos == 0) {
-            // Eliminar primer nodo
+            // eliminar primer nodo
             cabeza = cabeza->siguiente;
 
-            // MEJORA: actualizar cola si la lista queda vacia
+            // actualizar cola si la lista queda vacia
             if (!cabeza) {
                 cola = nullptr;
             }
@@ -96,12 +128,12 @@ public:
             delete temp;
         }
         else {
-            // Eliminar nodo intermedio o final
+            // eliminar nodo intermedio o final
             for (int i = 0; i < pos - 1; i++) temp = temp->siguiente;
             Nodo<T>* aEliminar = temp->siguiente;
             temp->siguiente = aEliminar->siguiente;
 
-            // MEJORA: actualizar cola si eliminamos el ultimo nodo
+            // actualizar cola si eliminamos el ultimo nodo
             if (aEliminar == cola) {
                 cola = temp;
             }
@@ -112,8 +144,10 @@ public:
         return true;
     }
 
-    // metodo custom 2 integrante 1: obtener elemento en posicion
-    // Complejidad: O(n) - recorre hasta la posicion deseada
+    // *** metodo personalizado #2 integrante 1: obtener elemento en posicion ***
+    // complejidad: O(n) - recorre hasta la posicion deseada
+    // es O(n) porque en peor caso (pos = n-1) recorre n-1 nodos
+    // no se puede optimizar mas en lista enlazada simple (no hay acceso directo)
     T* obtenerEnPosicion(int pos) const {
         if (pos < 0 || pos >= tamano) return nullptr;
         Nodo<T>* temp = cabeza;
@@ -123,30 +157,37 @@ public:
         return &(temp->dato);
     }
 
-    // metodo custom 3 integrante 1: invertir lista
-    // Complejidad: O(n) - recorre una vez invirtiendo punteros
+    // *** metodo personalizado #3 integrante 1: invertir lista ***
+    // complejidad: O(n) - recorre una vez invirtiendo punteros
+    // algoritmo: invierte direccion de todos los punteros siguientes
+    // es O(n) porque:
+    //   - recorre cada nodo exactamente una vez
+    //   - por cada nodo hace operaciones O(1)
+    //   - total: n * O(1) = O(n)
     void invertir() {
         if (!cabeza || !cabeza->siguiente) return;
 
-        // MEJORA: actualizar puntero cola antes de invertir
+        // actualizar puntero cola antes de invertir
         cola = cabeza;
 
         Nodo<T>* anterior = nullptr;
         Nodo<T>* actual = cabeza;
         Nodo<T>* siguiente = nullptr;
 
+        // invertir punteros uno por uno
         while (actual) {
-            siguiente = actual->siguiente;
-            actual->siguiente = anterior;
-            anterior = actual;
-            actual = siguiente;
+            siguiente = actual->siguiente;     // guardar siguiente
+            actual->siguiente = anterior;      // invertir puntero
+            anterior = actual;                 // avanzar anterior
+            actual = siguiente;                // avanzar actual
         }
 
         cabeza = anterior;  // nuevo cabeza es el antiguo ultimo nodo
     }
 
-    // Aplicar funcion a cada elemento (con lambda)
-    // Complejidad: O(n)
+    // aplicar funcion a cada elemento (con lambda)
+    // complejidad: O(n) - recorre toda la lista
+    // permite aplicar cualquier operacion a cada elemento via lambda
     void imprimir(std::function<void(T)> formato) {
         Nodo<T>* temp = cabeza;
         while (temp) {
@@ -155,35 +196,33 @@ public:
         }
     }
 
-    // Getter: obtener tamaño de la lista
-    // Complejidad: O(1)
+    // getter: obtener tamaño de la lista
+    // complejidad: O(1) - retorna variable miembro
     int getTamano() const { return tamano; }
 
-    // metodo auxiliar para obtener cabeza (necesario para pila y otras estructuras)
+    // metodos auxiliares para obtener/establecer cabeza y cola
+    // necesarios para estructuras que usan listasimple internamente (pila, cola)
     Nodo<T>* getCabeza() { return cabeza; }
-
-    // metodo auxiliar para obtener cola
     Nodo<T>* getCola() { return cola; }
-
-    // metodo auxiliar para establecer cabeza (necesario para pila)
     void setCabeza(Nodo<T>* nuevaCabeza) { cabeza = nuevaCabeza; }
-
-    // NUEVO: metodo auxiliar para establecer cola
     void setCola(Nodo<T>* nuevaCola) { cola = nuevaCola; }
 
-    // recursividad integrante 1: contar nodos recursivamente
-    // Complejidad: O(n) - recorre todos los nodos
-    // Caso base: nodo nulo retorna 0
-    // Caso recursivo: 1 + contar resto de la lista
+    // *** recursividad integrante 1: contar nodos recursivamente ***
+    // complejidad: O(n) - recorre todos los nodos
+    // caso base: nodo nulo retorna 0 (fin de lista)
+    // caso recursivo: 1 (nodo actual) + contar resto de la lista
+    // formula: T(n) = 1 + T(n-1), caso base: T(0) = 0
+    // solucion: T(n) = n, por lo tanto O(n)
     int contarRecursivo(Nodo<T>* nodo) {
-        if (!nodo) return 0;
-        return 1 + contarRecursivo(nodo->siguiente);
+        if (!nodo) return 0;  // caso base
+        return 1 + contarRecursivo(nodo->siguiente);  // caso recursivo
     }
+
+    // version publica: inicia recursion desde cabeza
     int contarRecursivo() { return contarRecursivo(cabeza); }
 
-    // metodo auxiliar para limpiar sin destruir
-    // MEJORADO: Actualiza cola tambien
-    // Complejidad: O(n)
+    // metodo auxiliar para limpiar sin destruir objeto
+    // complejidad: O(n)
     void limpiar() {
         Nodo<T>* temp;
         while (cabeza) {
@@ -191,7 +230,7 @@ public:
             cabeza = cabeza->siguiente;
             delete temp;
         }
-        cabeza = cola = nullptr;  // MEJORA: asegurar que cola tambien sea nullptr
+        cabeza = cola = nullptr;
         tamano = 0;
     }
 };
