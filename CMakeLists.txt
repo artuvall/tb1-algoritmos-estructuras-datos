@@ -27,4 +27,5 @@ add_executable(ConsoleApplication52
     SistemaFinanciero.h
     Transaccion.h
         Retiro.h
+        Interfaz.h
 )

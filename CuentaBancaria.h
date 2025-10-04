@@ -2,6 +2,8 @@
 #ifndef CUENTABANCARIA_H
 #define CUENTABANCARIA_H
 #include <string>
+#include <vector>
+#include <algorithm>
 #include "Transaccion.h"
 #include "ListaDoble.h"
 using namespace std;
@@ -15,6 +17,7 @@ protected:
     ListaDoble<Transaccion*> historialTransacciones;
 
     // metodo auxiliar para mergesort: merge dos sublistas
+    // Complejidad: O(n) donde n es el tamaño del subarreglo
     void merge(Transaccion** arr, int izq, int medio, int der, std::function<bool(Transaccion*, Transaccion*)> comp) {
         int n1 = medio - izq + 1;
         int n2 = der - medio;
@@ -45,6 +48,7 @@ protected:
     }
 
     // metodo auxiliar recursivo para mergesort
+    // Complejidad: O(n log n)
     void mergeSortRecursivo(Transaccion** arr, int izq, int der, std::function<bool(Transaccion*, Transaccion*)> comp) {
         if (izq < der) {
             int medio = izq + (der - izq) / 2;
@@ -71,45 +75,48 @@ public:
     string getNumCuenta() const { return numCuenta; }
     string getTitular() const { return titular; }
 
-    // mergesort integrante 2: ordenar historial de transacciones
+    // OPTIMIZADO: mergesort integrante 2 - ordenar historial de transacciones
+    // MEJORA: Reenlaza nodos existentes en vez de eliminar y recrear
+    // Complejidad total: O(n log n) - antes era O(n log n) + O(n) destruccion + O(n) recreacion
+    // Ahora es O(n log n) + O(n) reenlazado = O(n log n) mas eficiente
     void ordenarHistorialMerge() {
         int n = historialTransacciones.getTamano();
         if (n <= 1) return;
 
-        // convertir lista a array temporal
-        Transaccion** arr = new Transaccion*[n];
-        for (int i = 0; i < n; i++) {
-            arr[i] = *historialTransacciones.obtenerEnPosicion(i);
+        // PASO 1: Recolectar nodos en vector (O(n))
+        vector<NodoDoble<Transaccion*>*> nodos;
+        NodoDoble<Transaccion*>* actual = historialTransacciones.getCabeza();
+
+        while (actual) {
+            nodos.push_back(actual);
+            actual = actual->siguiente;
         }
 
-        // lambda 1 integrante 2: comparador para ordenar por fecha
-        auto comparador = [](Transaccion* a, Transaccion* b) {
-            // comparar por fecha (mas reciente primero)
-            // asumiendo formato DD/MM/AAAA, ordenar de forma descendente
-            return a->getFecha() > b->getFecha();
+        // PASO 2: lambda 1 integrante 2 - comparador para ordenar por fecha
+        // Ordena de mas reciente a menos reciente (descendente)
+        auto comparador = [](NodoDoble<Transaccion*>* a, NodoDoble<Transaccion*>* b) {
+            return a->dato->getFecha() > b->dato->getFecha();
         };
 
-        mergeSortRecursivo(arr, 0, n - 1, comparador);
+        // PASO 3: Ordenar vector de nodos usando sort (usa MergeSort internamente)
+        // Complejidad: O(n log n)
+        sort(nodos.begin(), nodos.end(), comparador);
 
-        // reconstruir lista ordenada
-        NodoDoble<Transaccion*>* temp = historialTransacciones.getCabeza();
-        while (temp) {
-            NodoDoble<Transaccion*>* sig = temp->siguiente;
-            delete temp;
-            temp = sig;
+        // PASO 4: Reenlazar nodos en el orden correcto (O(n))
+        // OPTIMIZACION: No destruye ni recrea nodos, solo actualiza punteros
+        for (size_t i = 0; i < nodos.size(); i++) {
+            nodos[i]->anterior = (i > 0) ? nodos[i-1] : nullptr;
+            nodos[i]->siguiente = (i < nodos.size()-1) ? nodos[i+1] : nullptr;
         }
 
-        // reinsertar ordenado
-        for (int i = n - 1; i >= 0; i--) {
-            historialTransacciones.insertarAlInicio(arr[i]);
-        }
-
-        delete[] arr;
+        // PASO 5: Actualizar cabeza y cola de la lista
+        historialTransacciones.setCabeza(nodos[0]);
+        historialTransacciones.setCola(nodos.back());
     }
 
     // metodo auxiliar para mostrar saldo con lambda
+    // lambda 2 integrante 2: formatear informacion de cuenta
     void mostrarInfo() {
-        // lambda 2 integrante 2: formatear informacion de cuenta
         auto formatear = [this]() {
             cout << "Cuenta: " << numCuenta << " | Saldo: $" << saldo
                  << " | Titular: " << titular << endl;

@@ -13,149 +13,104 @@ int main() {
     // contador para auto-generar IDs de clientes
     static int contadorID = 1;
 
-    cout << "\n=== BIENVENIDO AL SISTEMA FINANCIERO ===\n";
+    cout << "\n=== BIENVENIDO AL SISTEMA FINANCIERO CAJA HUANCAYO ===\n";
 
     do {
         sistema.mostrarMenuPrincipal();
-        cout << "Seleccione opcion: ";
+        cout << "Seleccione categoria: ";
         cin >> opcion;
 
         switch (opcion) {
         case 1: {
-            // caso 1: registrar cliente con ID auto-generado
-            cout << "\n=== REGISTRAR NUEVO CLIENTE ===\n";
+            // CATEGORIA 1: GESTION DE CLIENTES
+            // Mostrar submenu primero
+            int subopcion;
+            Interfaz::mostrarTitulo("GESTION DE CLIENTES", 50);
+            cout << "1. Registrar Nuevo Cliente\n";
+            cout << "2. Abrir Cuenta Bancaria\n";
+            cout << "3. Ver Reporte Ordenado de Clientes\n";
+            cout << "0. Volver al Menu Principal\n";
+            Interfaz::mostrarSeparador('-', 50);
+            cout << "Seleccione opcion: ";
+            cin >> subopcion;
 
-            // auto-generar ID secuencial (CLI00001, CLI00002, etc)
-            string id = "CLI" + string(5 - to_string(contadorID).length(), '0') + to_string(contadorID);
-            contadorID++;
+            if (subopcion == 1) {
+                // Registrar cliente con ID auto-generado
+                cout << "\n=== REGISTRAR NUEVO CLIENTE ===\n";
 
-            cout << "ID Auto-generado: " << id << "\n\n";
+                string id = "CLI" + string(5 - to_string(contadorID).length(), '0') + to_string(contadorID);
+                contadorID++;
 
-            string nombre, apellido, email, codigo, fecha;
-            cout << "Nombre: ";
-            cin >> nombre;
-            cout << "Apellido: ";
-            cin >> apellido;
-            cout << "Email: ";
-            cin >> email;
-            cout << "Codigo de Cliente (ej: 121200): ";
-            cin >> codigo;
+                cout << "ID Auto-generado: " << id << "\n\n";
 
-            // validar que el codigo no este duplicado
-            if (sistema.buscarPorCodigo(codigo) != nullptr) {
-                cout << "\n*** ERROR: Ya existe un cliente con el codigo " << codigo << " ***\n";
-                cout << "Registro cancelado. Intente con un codigo diferente.\n";
-                contadorID--; // revertir el incremento del ID
-                break;
+                string nombre, apellido, email, codigo, fecha;
+                cout << "Nombre: "; cin >> nombre;
+                cout << "Apellido: "; cin >> apellido;
+                cout << "Email: "; cin >> email;
+                cout << "Codigo de Cliente (ej: 121200): "; cin >> codigo;
+
+                if (sistema.buscarPorCodigo(codigo) != nullptr) {
+                    Interfaz::mostrarError("Ya existe un cliente con el codigo " + codigo);
+                    contadorID--;
+                    break;
+                }
+
+                cout << "Fecha Registro (DD/MM/AAAA): "; cin >> fecha;
+
+                Cliente* nuevo = new Cliente(id, nombre, apellido, email, codigo, fecha);
+
+                cout << "\nTipo de cliente (1 = persona natural, 2 = persona juridica): ";
+                int tipo; cin >> tipo;
+
+                if (tipo == 1) {
+                    cout << "DNI: "; string dni; cin >> dni;
+                    cout << "Fecha de nacimiento (DD/MM/AAAA): "; string fn; cin >> fn;
+                    PersonaNatural* pn = new PersonaNatural(id, nombre, apellido, email, dni, fn);
+                    nuevo->setDetallesPersona(pn);
+                } else if (tipo == 2) {
+                    cout << "RUC: "; string ruc; cin >> ruc;
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Razon social: "; string razon; getline(cin, razon);
+                    PersonaJuridica* pj = new PersonaJuridica(id, nombre, apellido, email, ruc, razon);
+                    nuevo->setDetallesPersona(pj);
+                }
+
+                sistema.registrarNuevoCliente(nuevo);
+            } else if (subopcion == 2) {
+                sistema.abrirCuenta();
+            } else if (subopcion == 3) {
+                sistema.generarReporteOrdenado();
             }
-
-            cout << "Fecha Registro (DD/MM/AAAA): ";
-            cin >> fecha;
-
-            Cliente* nuevo = new Cliente(id, nombre, apellido, email, codigo, fecha);
-
-            // preguntar tipo de persona y asignar detalles
-            cout << "\nTipo de cliente (1 = persona natural, 2 = persona juridica): ";
-            int tipo;
-            cin >> tipo;
-            if (tipo == 1) {
-                // persona natural: solicitar dni y fecha de nacimiento
-                cout << "DNI: ";
-                string dni; cin >> dni;
-                cout << "Fecha de nacimiento (DD/MM/AAAA): ";
-                string fn; cin >> fn;
-                PersonaNatural* pn = new PersonaNatural(id, nombre, apellido, email, dni, fn);
-                nuevo->setDetallesPersona(pn);
-            } else if (tipo == 2) {
-                // persona juridica: solicitar ruc y razon social (puede tener espacios)
-                cout << "RUC: ";
-                string ruc; cin >> ruc;
-                // limpiar el newline antes de getline
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Razon social: ";
-                string razon;
-                getline(cin, razon);
-                PersonaJuridica* pj = new PersonaJuridica(id, nombre, apellido, email, ruc, razon);
-                nuevo->setDetallesPersona(pj);
-            } else {
-                cout << "Tipo invalido. Se registrara sin detalles especificos.\n";
-            }
-
-            sistema.registrarNuevoCliente(nuevo);
             break;
         }
+
         case 2: {
-            // caso 2: abrir cuenta
-            sistema.abrirCuenta();
+            // CATEGORIA 2: OPERACIONES BANCARIAS
+            sistema.menuOperacionesBancarias();
             break;
-        }
-        case 3: {
-            // caso 3: deposito/retiro
-            sistema.depositoRetiro();
-            break;
-        }
-        case 4: {
-            // caso 4: solicitar prestamo
-            sistema.solicitarPrestamo();
-            break;
-        }
-        case 5: {
-            // caso 5: generar reporte
-            sistema.generarReporteOrdenado();
-            break;
-        }
-        case 6: {
-            // caso 6: guardar datos
-            sistema.guardarDatos();
-            break;
-        }
-        case 7: {
-            // caso 7: procesar siguiente transaccion
-            sistema.procesarSiguienteTransaccion();
-            break;
-        }
-        case 8: {
-            // caso 8: deshacer ultima operacion
-            sistema.deshacerUltimaOperacion();
-            break;
-        }
-        case 9: {
-            // caso 9: ver historial global
-            sistema.verHistorialGlobal();
-            break;
-        }
-        case 10: {
-            // caso 10: ver cronograma de prestamo
-            sistema.verCronograma();
-            break;
-        }
-        case 11: {
-            // caso 11: pagar cuota de prestamo
-            sistema.pagarCuotaPrestamo();
-            break;
-        }
-        case 0: {
-            cout << "\n=== SALIENDO DEL SISTEMA ===\n";
-            cout << "Desea guardar los cambios antes de salir? (s/n): ";
-            char respuesta;
-            cin >> respuesta;
-            if (respuesta == 's' || respuesta == 'S') {
-                sistema.guardarDatos();
-            }
-            cout << "Gracias por usar el Sistema Financiero!\n";
-            break;
-        }
-        default: {
-            cout << "Opcion invalida. Intente nuevamente.\n";
-            break;
-        }
         }
 
-        if (opcion != 0) {
-            // pausa antes de mostrar el menu nuevamente
-            cout << "\nPresione Enter para continuar...";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cin.get();
+        case 3: {
+            // CATEGORIA 3: PRESTAMOS
+            sistema.menuPrestamos();
+            break;
+        }
+
+        case 4: {
+            // CATEGORIA 4: ADMINISTRACION
+            sistema.menuAdministracion();
+            break;
+        }
+
+        case 0: {
+            Interfaz::mostrarTitulo("CERRANDO SISTEMA", 50);
+            cout << "Gracias por usar el Sistema Financiero Caja Huancayo.\n";
+            cout << "Hasta pronto!\n\n";
+            break;
+        }
+
+        default:
+            Interfaz::mostrarError("Opcion invalida. Intente nuevamente.");
         }
 
 

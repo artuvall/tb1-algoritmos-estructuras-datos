@@ -1,8 +1,11 @@
 #ifndef GESTORCLIENTES_H  
 #define GESTORCLIENTES_H  
-//GestorClientes.h
-#include "Cliente.h"  
-#include "ListaSimple.h"  
+//GestorClientes.h - Gestion de clientes con HeapSort
+// OPTIMIZACION: Mejorado HeapSort para reenlazar nodos en vez de recrear lista
+#include "Cliente.h"
+#include "ListaSimple.h"
+#include <vector>
+#include <algorithm>
 #include <iostream>
 
 using namespace std;  
@@ -11,7 +14,8 @@ class GestorClientes {
 private:  
    ListaSimple<Cliente*> listaClientes;  
 
-   // metodo auxiliar para heapsort: heapify
+   // metodo auxiliar para heapsort: heapify (convertir subarbol en heap)
+   // Complejidad: O(log n) - desciende por la altura del arbol
    void heapify(Cliente** arr, int n, int i, std::function<bool(Cliente*, Cliente*)> comp) {
        int mayor = i;
        int izq = 2 * i + 1;
@@ -29,36 +33,54 @@ private:
    }
 
 public:
-   void registrarNuevoCliente(Cliente* c) { listaClientes.insertarAlFinal(c); }  
+   // Registrar nuevo cliente al final de la lista
+   // Complejidad: O(1) - gracias a puntero cola optimizado
+   void registrarNuevoCliente(Cliente* c) { listaClientes.insertarAlFinal(c); }
 
-   Cliente* buscarPorCodigo(const string& codigo) {  
+   // Buscar cliente por codigo usando lambda
+   // Complejidad: O(n) - recorre hasta encontrar
+   Cliente* buscarPorCodigo(const string& codigo) {
        auto pred = [codigo](Cliente* cl) { return cl->getCodigo() == codigo; };
        Cliente** resultado = listaClientes.buscar(pred);
        return resultado ? *resultado : nullptr;
    }
 
-   // heapsort integrante 3: ordenar clientes por codigo
+   // OPTIMIZADO: heapsort integrante 3 - ordenar clientes por codigo
+   // MEJORA: Reenlaza nodos existentes en vez de limpiar y recrear lista completa
+   // Complejidad: O(n log n) - construccion heap O(n) + extracciones O(n log n)
    void ordenarClientesHeap() {
        int n = listaClientes.getTamano();
        if (n <= 1) return;
 
-       // convertir lista a array temporal
-       Cliente** arr = new Cliente*[n];
-       for (int i = 0; i < n; i++) {
-           arr[i] = *listaClientes.obtenerEnPosicion(i);
+       // PASO 1: Recolectar nodos en vector (O(n))
+       vector<Nodo<Cliente*>*> nodos;
+       Nodo<Cliente*>* actual = listaClientes.getCabeza();
+
+       while (actual) {
+           nodos.push_back(actual);
+           actual = actual->siguiente;
        }
 
-       // lambda 1 integrante 3: comparador para ordenar por codigo
+       // PASO 2: Extraer punteros a clientes para ordenar
+       Cliente** arr = new Cliente*[n];
+       for (int i = 0; i < n; i++) {
+           arr[i] = nodos[i]->dato;
+       }
+
+       // PASO 3: lambda 1 integrante 3 - comparador para ordenar por codigo
+       // Usa orden descendente para crear max-heap
        auto comparador = [](Cliente* a, Cliente* b) {
-           return a->getCodigo() > b->getCodigo(); // orden descendente para max-heap
+           return a->getCodigo() > b->getCodigo();
        };
 
-       // construir heap (reorganizar array)
+       // PASO 4: Construir heap (reorganizar array)
+       // Complejidad: O(n) - contrario a lo que parece
        for (int i = n / 2 - 1; i >= 0; i--) {
            heapify(arr, n, i, comparador);
        }
 
-       // extraer elementos del heap uno por uno
+       // PASO 5: Extraer elementos del heap uno por uno
+       // Complejidad: O(n log n)
        for (int i = n - 1; i > 0; i--) {
            Cliente* temp = arr[0];
            arr[0] = arr[i];
@@ -66,16 +88,26 @@ public:
            heapify(arr, i, 0, comparador);
        }
 
-       // reconstruir lista ordenada
-       listaClientes.limpiar();
+       // PASO 6: Actualizar datos de nodos con clientes ordenados (O(n))
+       // OPTIMIZACION: No destruye ni recrea nodos, solo actualiza el dato
        for (int i = 0; i < n; i++) {
-           listaClientes.insertarAlFinal(arr[i]);
+           nodos[i]->dato = arr[i];
        }
+
+       // PASO 7: Reenlazar nodos en secuencia correcta (O(n))
+       for (int i = 0; i < n; i++) {
+           nodos[i]->siguiente = (i < n-1) ? nodos[i+1] : nullptr;
+       }
+
+       // PASO 8: Actualizar cabeza y cola
+       listaClientes.setCabeza(nodos[0]);
+       listaClientes.setCola(nodos[n-1]);
 
        delete[] arr;
    }
 
    // lambda 2 integrante 3: filtrar clientes con saldo total mayor a monto
+   // Complejidad: O(n) - recorre toda la lista una vez
    ListaSimple<Cliente*> filtrarPorSaldo(double montoMinimo) {
        ListaSimple<Cliente*> resultado;
        auto filtro = [montoMinimo](Cliente* cl) {
@@ -93,6 +125,7 @@ public:
    }
 
    // lambda 3 integrante 3: contar clientes activos
+   // Complejidad: O(n) - recorre toda la lista
    int contarClientesActivos() {
        int count = 0;
        auto contador = [&count](Cliente* cl) {
@@ -103,6 +136,7 @@ public:
    }
 
    // metodo para imprimir todos los clientes
+   // Complejidad: O(n)
    void imprimirClientes() {
        cout << "\n=== LISTA DE CLIENTES ===\n";
        auto imprimir = [](Cliente* cl) {
@@ -112,6 +146,7 @@ public:
        listaClientes.imprimir(imprimir);
    }
 
+   // Getter: acceso a lista de clientes
    ListaSimple<Cliente*>& getListaClientes() { return listaClientes; }
 };
 

@@ -21,8 +21,11 @@ public:
 
     virtual bool validar() = 0; // Metodo abstracto para polimorfismo.
 
+    // Getters basicos
     string getId() const { return id; }
     string getNombre() const { return nombre; }
+    string getApellido() const { return apellido; }  // AGREGADO
+    string getEmail() const { return email; }        // AGREGADO
 };
 
 #endif

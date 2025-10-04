@@ -19,8 +19,15 @@ private:
     Persona* detallesPersona = nullptr; // puntero a persona natural o juridica
 
 public:
+    // Constructor original (sin detalles)
     Cliente(string i, string n, string a, string e, string c, string f)
         : Persona(i, n, a, e), codigo(c), fechaRegistro(f) {
+    }
+
+    // NUEVO: Constructor sobrecargado que acepta detalles de persona
+    // Usado por ArchivoManager al cargar desde archivo
+    Cliente(string i, string n, string a, string e, string c, string f, Persona* detalles)
+        : Persona(i, n, a, e), codigo(c), fechaRegistro(f), detallesPersona(detalles) {
     }
 
     ~Cliente() {
@@ -35,6 +42,7 @@ public:
     bool validar() override { return true; }
 
     string getCodigo() const { return codigo; }
+    string getFechaAlta() const { return fechaRegistro; }  // AGREGADO: alias para fecha
 
     void agregarCuenta(CuentaBancaria* cu) { cuentas.insertarAlFinal(cu); }
 
