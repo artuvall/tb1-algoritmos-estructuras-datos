@@ -101,7 +101,7 @@ public:
     }
 
     // generar cuotas con amortizacion simple
-    // complejidad: O(n^2) por fisher-yates shuffle
+    // complejidad: O(n) por fisher-yates shuffle
     // crea n cuotas desordenadas para demostrar efectividad de quicksort
     void generarCuotas() {
         double montoTotal = calcularMontoTotal();

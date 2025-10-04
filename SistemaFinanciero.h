@@ -821,7 +821,18 @@ public:
         cout << "Tipo: " << (op->esDeposito ? "Deposito" : "Retiro") << "\n";
         cout << "Monto: S/ " << op->transaccion->getMonto() << "\n";
 
-        // ejecutar segun tipo
+        // *** IMPORTANTE: llamar al metodo ejecutar() de la transaccion ***
+        // esto activa las lambdas de validacion del integrante 3 que estaban muertas
+        // ejecutar() retorna true si las validaciones pasan
+        bool validacionExitosa = op->transaccion->ejecutar();
+
+        if (!validacionExitosa) {
+            Interfaz::mostrarError("Validacion de transaccion fallida.");
+            delete op; // liberar memoria
+            return;
+        }
+
+        // ejecutar segun tipo (aplicar cambios a la cuenta)
         bool exito = false;
         if (op->esDeposito) {
             exito = op->cuenta->depositar(op->transaccion->getMonto());

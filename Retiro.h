@@ -6,7 +6,7 @@
 // descripcion: clase derivada de transaccion - representa retiro
 // cumplimiento de rubrica:
 //   - entidad #10: hereda de transaccion
-//   - lambdas integrante 3: 3 lambdas para validacion y confirmacion
+//   - lambda integrante 3 (#2): validacion de monto con lambda
 //   - paradigma poo: herencia, polimorfismo
 // =============================================================================
 
@@ -28,44 +28,25 @@ public:
 
     // implementacion de ejecutar() para retiro
     // demuestra polimorfismo: validaciones diferentes a deposito
+    // este metodo ahora es llamado por sistemafinanciero::procesarsiguientetransaccion()
     bool ejecutar() override {
-        // *** lambda #1 integrante 3: validar monto positivo ***
+        // *** lambda #2 integrante 3: validar monto positivo ***
         // esta lambda verifica que el retiro sea mayor a 0
-        // uso de lambda: captura por valor, retorna bool
-        // razon: no tiene sentido retirar monto negativo o cero
+        // uso de lambda: captura por valor [m], retorna bool
+        // razon: validacion critica - no tiene sentido retirar monto negativo o cero
+        // complejidad: o(1) - comparacion simple
         auto montoValido = [](double m) { return m > 0; };
+
         if (!montoValido(monto)) {
-            cout << "Error: Monto de retiro debe ser mayor a 0.\n";
+            cout << "error: monto de retiro debe ser mayor a 0.\n";
             return false;
         }
 
-        // *** lambda #2 integrante 3: validar canal de retiro ***
-        // esta lambda verifica que el canal sea uno de los permitidos
-        // uso de lambda: captura this por valor para acceder a canal
-        // razon: solo ciertos canales de retiro estan habilitados
-        auto canalValido = [this]() {
-            return (canal == "Cajero" || canal == "Ventanilla" || canal == "App");
-        };
-        if (!canalValido()) {
-            cout << "Error: Canal de retiro no valido.\n";
-            return false;
-        }
-
-        // *** lambda #3 integrante 3: confirmar ejecucion exitosa ***
-        // esta lambda muestra mensaje de confirmacion al usuario
-        // uso de lambda: captura this por valor para acceder a atributos
-        // razon: feedback al usuario sobre operacion exitosa
-        auto confirmar = [this]() {
-            cout << "Retiro exitoso: ID=" << id << ", Monto=" << monto
-                 << ", Canal=" << canal << endl;
-        };
-        confirmar();
+        cout << "retiro validado: id=" << id << ", monto=" << monto
+             << ", canal=" << canal << endl;
 
         return true;
     }
-
-    // getter para el canal (para reportes o validacion)
-    string getCanal() const { return canal; }
 };
 
 #endif
