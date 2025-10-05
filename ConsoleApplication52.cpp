@@ -1,55 +1,29 @@
-// =============================================================================
-// archivo: consoleapplication52.cpp
-// descripcion: archivo principal del sistema financiero - punto de entrada
-// cumplimiento de rubrica:
-//   - programa en consola con interfaz amigable y usable
-//   - menu organizado por categorias
-//   - integra todas las estructuras de datos y algoritmos
-//   - demuestra uso completo del sistema poo
-// autor: grupo de 4 integrantes
-// fecha: octubre 2025
-// =============================================================================
-
 #include "SistemaFinanciero.h"
 #include "PersonaNatural.h"
 #include "PersonaJuridica.h"
 #include <iostream>
 #include <limits>
-
 using namespace std;
 
-// funcion principal: punto de entrada del programa
-// responsabilidad: coordinar el flujo del sistema
-// complejidad: O(1) para inicializacion, luego depende de operaciones de usuario
 int main() {
-    // crear instancia del sistema financiero
-    // esto carga automaticamente los datos del archivo clientes.txt si existe
+
     SistemaFinanciero sistema;
     int opcion;
 
-    // contador para auto-generar ids de clientes
-    // garantiza que cada cliente tenga id unico
     static int contadorID = 1;
 
-    // mensaje de bienvenida
+
     cout << "\n=== BIENVENIDO AL SISTEMA FINANCIERO BUENAVISTA ===\n";
 
-    // bucle principal del programa
-    // se ejecuta hasta que usuario seleccione salir (opcion 0)
     do {
-        // mostrar menu principal con 4 categorias
-        // diseño modular: cada categoria tiene su propio submenu
+
         sistema.mostrarMenuPrincipal();
         cout << "Seleccione categoria: ";
         cin >> opcion;
 
-        // switch principal: maneja las 4 categorias del sistema
         switch (opcion) {
         case 1: {
-            // ===================================================================
-            // categoria 1: gestion de clientes
-            // ===================================================================
-            // incluye: registrar cliente, abrir cuenta, ver reportes, generar datos demo
+
 
             int subopcion;
             Interfaz::mostrarTitulo("GESTION DE CLIENTES", 50);
@@ -63,33 +37,28 @@ int main() {
             cin >> subopcion;
 
             if (subopcion == 1) {
-                // registrar cliente con id auto-generado
+
                 cout << "\n=== REGISTRAR NUEVO CLIENTE ===\n";
 
-                // generar id unico con formato CLI00001, CLI00002, etc
                 string id = "CLI" + string(5 - to_string(contadorID).length(), '0') + to_string(contadorID);
                 contadorID++;
 
                 cout << "ID Auto-generado: " << id << "\n\n";
 
-                // solicitar datos basicos del cliente
                 string nombre, apellido, email, codigo, fecha;
                 cout << "Nombre: "; cin >> nombre;
                 cout << "Apellido: "; cin >> apellido;
                 cout << "Email: "; cin >> email;
                 cout << "Codigo de Cliente (ej: 121200): "; cin >> codigo;
 
-                // validar que codigo no exista ya
-                // usa lambda de busqueda en gestorclientes
                 if (sistema.buscarPorCodigo(codigo) != nullptr) {
                     Interfaz::mostrarError("Ya existe un cliente con el codigo " + codigo);
-                    contadorID--; // revertir contador
+                    contadorID--;
                     break;
                 }
 
                 cout << "Fecha Registro (DD/MM/AAAA): "; cin >> fecha;
 
-                // crear cliente base
                 Cliente* nuevo = new Cliente(id, nombre, apellido, email, codigo, fecha);
 
                 // solicitar tipo de persona: natural (1) o juridica (2)
